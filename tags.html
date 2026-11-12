@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Wake Up &amp; Breathe — Bedside Tags</title>
+<style>
+  :root{
+    --cardinal:#990000; --cardinal-br:#c01414; --gold:#FFC72C; --slate:#16202E;
+    --slate2:#1f2c3d; --off:#F4F1EB; --green:#157A4A; --amber:#E8A33D;
+    --line:rgba(255,255,255,.12); --muted:#9fb0c4;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--slate);color:var(--off);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5}
+  .wrap{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+  .hdr{background:var(--cardinal);color:#fff;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+    font-size:15px;padding:16px 18px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
+  .hdr .wave{font-size:18px}
+  .hdr.chart{background:#2a3850}
+  .body{flex:1;padding:22px 20px 40px}
+  h1{font-size:26px;line-height:1.15;margin:0 0 6px;color:#fff;font-weight:800}
+  h2{font-size:19px;margin:18px 0 8px;color:#fff;font-weight:800}
+  p{font-size:17px;color:#dfe6ef;margin:0 0 14px}
+  .riddle{font-size:21px;font-style:italic;color:var(--off);line-height:1.55;margin:10px 0 22px}
+  .muted{color:var(--muted);font-size:15px}
+  .foot{font-size:14px;color:var(--muted);border-top:1px solid var(--line);padding:16px 20px;text-align:center}
+  .btn{display:block;width:100%;appearance:none;border:0;cursor:pointer;font-weight:700;font-size:17px;
+    border-radius:14px;padding:16px;background:var(--cardinal);color:#fff;margin:10px 0;text-align:left}
+  .btn:active{transform:scale(.98)}
+  .btn.ghost{background:var(--slate2);border:1px solid var(--line);color:#eef3f9}
+  .btn.gold{background:var(--gold);color:#3a2a00}
+  .code{background:#0e1620;border:2px solid var(--gold);border-radius:16px;padding:22px;text-align:center;margin:20px 0}
+  .code .lab{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:800}
+  .code .val{font-size:48px;font-weight:900;color:#fff;letter-spacing:6px;margin:6px 0;font-variant-numeric:tabular-nums}
+  .code .hint{font-size:14px;color:var(--muted)}
+  .ok{color:#6fd99f;font-weight:700}.bad{color:#ff9d9d;font-weight:700}
+  .dead{border:2px solid var(--amber);border-radius:14px;padding:16px;margin:14px 0;background:rgba(232,163,61,.08)}
+  .dead h2{color:var(--amber);margin-top:0;font-size:17px}
+  .q{border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;background:rgba(255,255,255,.03)}
+  .q p{font-size:16px;margin:0 0 10px;font-weight:600}
+  .yn{display:flex;gap:10px}
+  .yn button{flex:1;border:1px solid var(--line);background:var(--slate2);color:#cdd7e3;border-radius:10px;
+    padding:12px;font-weight:700;font-size:16px;cursor:pointer}
+  .yn button.selY{background:var(--cardinal);border-color:var(--cardinal);color:#fff}
+  .yn button.selN{background:var(--green);border-color:var(--green);color:#fff}
+  .fb{min-height:22px;font-size:15px;margin-top:8px}
+  .vit{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+  .vit div{background:#0e1620;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  .vit .l{font-size:12px;letter-spacing:1px;color:#8fa0b5;text-transform:uppercase}
+  .vit .v{font-size:24px;font-weight:800;color:#fff}
+  .vit .s{font-size:12px;color:var(--gold)}
+  .npc{border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:12px;padding:14px;
+    margin:12px 0;background:rgba(255,199,44,.05);font-style:italic;color:#ffeccb;font-size:16px}
+  .npc .who{font-style:normal;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);
+    font-weight:800;display:block;margin-bottom:6px}
+  .chartrow{border-bottom:1px solid var(--line);padding:11px 0;font-size:16px}
+  .chartrow b{color:#fff}
+  .hintbox{display:none;background:rgba(255,199,44,.08);border:1px solid rgba(255,199,44,.35);
+    border-radius:10px;padding:12px;margin-top:10px;color:#ffe9b3;font-size:15px}
+  .qmark{float:right;background:var(--slate2);border:1px solid var(--line);color:var(--gold);
+    border-radius:50%;width:34px;height:34px;font-weight:800;font-size:16px;cursor:pointer}
+  .notfound{text-align:center;padding:60px 20px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ===== Wake Up & Breathe — Keller NFC activity pages =====
+   One file, hash-routed. Write these URLs to the 7 NFC tags:
+     #t1 bed rail | #t2 chart | #t3 pumps | #t4 monitor | #t5 radio | #t6 vent | #t7 door
+   Branch (No cuff leak): point the vent + door tags at #t6b and #t7b instead of #t6/#t7.
+*/
+
+function el(tag, cls, html){ const e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
+function header(text, chart){ return `<div class="hdr${chart?' chart':''}"><span class="wave">${chart?'🩺':'🔒'}</span>${text}</div>`; }
+function foot(text){ return `<div class="foot">${text||'Type the code into the room screen.'}</div>`; }
+function codeBlock(val, hint){ return `<div class="code"><div class="lab">Your code</div><div class="val">${val}</div><div class="hint">${hint||''}</div></div>`; }
+
+/* --- T1 bed rail: RASS riddle --- */
+function t1(){
+  return header('Clue — Bed Rail')+`<div class="body">
+    <h1>Taped to the rail</h1>
+    <p class="riddle">"Chart me before you stop anything, again at fifteen, then every thirty. I run from minus five to plus four — and today we're steering him to zero. What am I?"</p>
+    <p class="muted">One word. It opens Lock 1.</p>
+  </div>`+foot();
+}
+
+/* --- T2 chart: SAT safety screen quiz --- */
+const t2items=[
+ ["Active seizures — or a sedative infusion FOR seizures?", false, "The day-1 shaking was rigors from fever — EEG negative, neuro signed off. Not a seizure, no AEDs."],
+ ["Active alcohol withdrawal therapy?", false, "Rare alcohol use, no withdrawal history, no CIWA running."],
+ ["RASS greater than 2?", false, "He's at goal 0."],
+ ["ICP 20+ — or sedation to control ICP?", false, "No neuro injury, no monitor. Decoy."],
+ ["Neuromuscular blockade infusion running?", false, "Never on a paralytic. The heparin drip is for his DVT — not a sedative, not a paralytic."],
+ ["Myocardial ischemia in the past 24 hours?", false, "Troponin 0.07→0.06 is a flat chronic CKD elevation, no ECG change. Not acute ischemia."],
+ ["Comfort care?", false, "Full code."],
+ ["Delayed sternal closure (open chest)?", false, "Decoy."]
+];
+function t2(){
+  const rows=t2items.map((it,i)=>`<div class="q"><p>${i+1}. ${it[0]}</p>
+    <div class="yn"><button onclick="pick(${i},1,this)">YES</button><button onclick="pick(${i},0,this)">NO</button></div></div>`).join('');
+  return header('Clue — The Chart', true)+`<div class="body">
+    <h1>SAT Safety Screen</h1>
+    <p>Screen him as he is <b>right now</b> — history is not an exclusion. Any YES = stop.</p>
+    ${rows}
+    <button class="btn" onclick="checkT2()">Submit the screen</button>
+    <div class="fb" id="t2fb"></div><div id="t2out"></div>
+  </div>`+foot();
+}
+const t2sel={};
+function pick(i,v,b){ t2sel[i]=v; b.parentElement.querySelectorAll('button').forEach(x=>x.className=''); b.className=v?'selY':'selN'; }
+function checkT2(){
+  const fb=document.getElementById('t2fb'), out=document.getElementById('t2out');
+  if(Object.keys(t2sel).length<8){ fb.innerHTML='<span class="bad">Answer all eight.</span>'; return; }
+  const wrong=t2items.map((it,i)=>t2sel[i]!==(it[1]?1:0)?i:-1).filter(x=>x>=0);
+  if(!wrong.length){ fb.innerHTML='<span class="ok">✓ He passes the screen.</span>';
+    out.innerHTML=codeBlock('AWAKE','The goal of the SAT.'); }
+  else { fb.innerHTML='<span class="bad">'+wrong.length+' would have held his sedation another day.</span>';
+    out.innerHTML='<div class="dead"><h2>Look again</h2>'+wrong.map(i=>'• '+t2items[i][2]).join('<br>')+'</div>'; }
+}
+
+/* --- T3 pumps: drip decision + awake check --- */
+function t3(){ return header('Clue — The Pumps')+`<div class="body" id="t3b">
+  <h1>Three drips are running</h1>
+  <p><b>Dexmedetomidine</b> (RASS goal 0) · <b>Fentanyl</b> (CPOT &lt;3) · <b>Heparin</b> (DVT). Run the awakening trial — what do you silence?</p>
+  <button class="btn ghost" onclick="t3a(0)">Stop dex &amp; fentanyl — clean slate</button>
+  <button class="btn ghost" onclick="t3a(1)">Stop dex only — keep fentanyl &amp; heparin</button>
+  <button class="btn ghost" onclick="t3a(2)">Leave dex — it's light anyway</button>
+  <button class="btn ghost" onclick="t3a(3)">Stop the heparin too, to be safe</button>
+  <div id="t3out"></div></div>`+foot(); }
+function t3a(x){
+  const out=document.getElementById('t3out');
+  if(x===1){ out.innerHTML='<div class="fb"><span class="ok">✓ Dex off (it IS a sedative). Fentanyl continues for pain. Heparin is untouched — it never belonged in this decision.</span></div>'+t3awake(); }
+  else if(x===0) out.innerHTML='<div class="dead"><h2>His pain just spiked</h2>CPOT 6, grimacing. You turned off his analgesia, not just sedation. Fentanyl continues at the lowest effective dose. Go back.</div>';
+  else if(x===2) out.innerHTML='<div class="dead"><h2>Dexmedetomidine is a sedative</h2>"Light" doesn\'t mean "leave it." Every sedative comes OFF for an awakening trial. Go back.</div>';
+  else out.innerHTML='<div class="dead"><h2>That\'s his DVT treatment</h2>Heparin has nothing to do with the SAT. Don\'t stop a therapeutic anticoagulant to run an awakening trial. Go back.</div>';
+}
+function t3awake(){
+  return `<h2 style="margin-top:20px">Twenty minutes later</h2>
+    <div class="npc"><span class="who">Mr. Keller</span>"Mm…" <span class="muted">(eyes open, drifting, looking at you)</span></div>
+    <p>His eyes are open and tracking. Has he passed the awake test?</p>
+    <button class="btn ghost" onclick="t3b(0)">Yes — eyes open is awake</button>
+    <button class="btn ghost" onclick="t3b(1)">Not yet — he has to follow a command</button>
+    <div id="t3out2"></div>`;
+}
+function t3b(x){
+  const o=document.getElementById('t3out2');
+  if(x===1){ o.innerHTML='<div class="npc"><span class="who">You</span>"Raymond — squeeze my hand. Show me two fingers."</div><div class="npc"><span class="who">Mr. Keller</span>…a breath, then he squeezes, and two fingers.</div><div class="fb"><span class="ok">✓ Awake = follows a command.</span></div>'+codeBlock('COMMAND','Eyes open was never the bar.'); }
+  else o.innerHTML='<div class="dead"><h2>Not yet</h2>Eyes open isn\'t awake. Per protocol, awake means he follows a simple command or tracks purposefully. A patient who isn\'t awake can\'t pass the SAT.</div>';
+}
+
+/* --- T4 monitor: failure criteria verdict + derivation (code 125) --- */
+function t4(){ return header('Clue — The Monitor')+`<div class="body">
+  <h1>Five-minute watch</h1>
+  <p>Sedation off, awake. Here's his strip:</p>
+  <div class="vit">
+    <div><div class="l">RASS</div><div class="v">+1</div><div class="s">restless</div></div>
+    <div><div class="l">SpO2</div><div class="v">89%</div><div class="s">target 88–92</div></div>
+    <div><div class="l">RR</div><div class="v">33</div><div class="s">peak</div></div>
+    <div><div class="l">HR</div><div class="v">96</div><div class="s">from 88</div></div>
+  </div>
+  <p><b>Does he FAIL the SAT?</b></p>
+  <button class="btn ghost" onclick="t4a(0)">Fail — restart sedation</button>
+  <button class="btn ghost" onclick="t4a(1)">Pass — nothing broke a limit</button>
+  <div id="t4out"></div></div>`+foot(); }
+function t4a(x){
+  const o=document.getElementById('t4out');
+  if(x===1){ o.innerHTML='<div class="fb"><span class="ok">✓ He brushed every limit but broke none. SpO2 89 never even reaches the 88 floor; RR 33 is under 35; RASS +1 is ≤2; HR +9% is within ±20%.</span></div>'+
+    '<div class="code"><div class="lab">Build the code</div><p style="margin:8px 0 0;color:#dfe6ef">Three limits he brushed: a RASS over <b>2</b>, a respiratory rate over <b>35</b>, a sat under <b>88</b>.</p><div class="hint" style="margin-top:10px">ADD them. One number → Lock 4.</div></div>'; }
+  else o.innerHTML='<div class="dead"><h2>You re-sedated a ready patient</h2>Which limit did he actually cross — and for how long? SpO2 needs &lt;88 for ≥5 min (he never hit 88). RR fails over 35. RASS over 2. He crossed none.</div>';
+}
+
+/* --- T5 radio: SBT safety screen; facilitator voices RCP (code 830) --- */
+function t5(){ return header('Clue — The Radio')+`<div class="body">
+  <h1>Call Respiratory</h1>
+  <p>The SAT was yours. The vent is not. Key the walkie, report everything, and screen the SBT side together.</p>
+  <div class="npc"><span class="who">RCP (on the walkie)</span>"Report your SAT result and his FiO2 and PEEP right now — not overnight. …Forty and a five, that clears me. He's a CO2 retainer and day five, so I'm going pressure support EIGHT, not five. Thirty minutes minimum."</div>
+  <h2>SBT safety screen — all clear?</h2>
+  <div class="chartrow"><b>FiO2 40%</b> ≤ 50 ✓ · <b>PEEP 5</b> &lt; 8 ✓ · SpO2 91 (target 88–92) ✓</div>
+  <div class="chartrow">RASS 0 ✓ · SAT passed ✓ · no MI in 24h ✓ · not chronically vent-dependent ✓</div>
+  <h2>Build your clearance code</h2>
+  <p>He gave you two numbers. Run them together — the <b>support level</b> first, then the <b>minutes</b>.</p>
+  <div class="code">
+    <div class="lab">Pressure support</div><div class="val" style="font-size:34px">8</div>
+    <div class="lab" style="margin-top:8px">for how many minutes?</div><div class="val" style="font-size:34px">30</div>
+    <div class="hint" style="margin-top:10px">Run them together → one 3-digit code for Lock 5.</div>
+    <div class="val" style="margin-top:8px">8 3 0</div>
+  </div>
+  <p class="muted">Note: his gas today (pH 7.35 / pCO2 56) is his compensated COPD baseline — not a reason to stop.</p>
+  </div>`+foot(); }
+
+/* --- T6 vent: RSBI + cuff leak (clean) --- */
+function t6(branch){
+  const cuff = branch
+    ? '<div class="npc"><span class="who">RCP</span>"Rate twenty-four… no, twenty-six. Tidal volume four hundred. You do the rapid-shallow math — I\'ll check the cuff. …That\'s a problem. Minimal leak, about sixty mils. Cuff leak is NEGATIVE, and he\'s day five. I\'m flagging the airway."</div>'
+    : '<div class="npc"><span class="who">RCP</span>"Rate\'s twenty-six, tidal volume four hundred. You do the rapid-shallow math — I\'ll check the cuff. …Good leak, one-eighty-five mils. Cuff leak POSITIVE."</div>';
+  return header('Clue — The Ventilator')+`<div class="body">
+    <h1>Weaning parameters</h1>
+    <p>Thirty-five minutes on pressure support 8. Here's the read:</p>
+    <div class="vit">
+      <div><div class="l">RR</div><div class="v">26</div><div class="s">spontaneous</div></div>
+      <div><div class="l">Vt</div><div class="v">400</div><div class="s">mL</div></div>
+    </div>
+    ${cuff}
+    <h2>Rapid Shallow Breathing Index</h2>
+    <p>RSBI = breaths per minute ÷ tidal volume in <b>LITERS</b>. Threshold &lt; 105.</p>
+    <div class="code">
+      <div class="lab">Your RSBI</div><div class="val" style="font-size:34px">26 ÷ 0.40 = 65</div>
+      <div class="hint" style="margin-top:10px">Lock 6 is a <b>three-digit</b> keypad, but your answer is only two digits — add a <b>leading zero</b>:</div>
+      <div class="val" style="margin-top:6px">0 6 5</div>
+    </div>
+    ${branch?'<div class="dead"><h2>But the leak is negative</h2>RSBI is fine — but a negative cuff leak at day 5 means airway-edema risk. The number isn\'t the whole story. Take 065 to Lock 6, then head to the door.</div>':''}
+  </div>`+foot();
+}
+
+/* --- T7 door: readiness to extubate --- */
+function t7(){ return header('Clue — The Door')+`<div class="body">
+  <h1>Readiness to extubate</h1>
+  <p>He passed everything. One screen left: a documented difficult airway, or a procedure within 48 h that needs re-intubation. Open the chart packet in the envelope and read the newest entries.</p>
+  <div class="chartrow">ED airway: <b>Grade II, bougie, first intubation</b> — no difficult-airway history.</div>
+  <div class="chartrow">No procedure scheduled.</div>
+  <div class="chartrow">RT note: cuff leak <b>POSITIVE</b>, measured <b>at 0545</b>.</div>
+  <p style="margin-top:14px">He clears. The code is the <b>minute Respiratory proved his airway would hold</b> — find it in the RT note.</p>
+  ${codeBlock('0 5 4 5','Four digits. The RT cuff-leak time.')}
+  </div>`+foot(); }
+
+/* --- T7b door (No-cuff-leak branch): HOLD decision --- */
+function t7b(){ return header('Clue — The Door')+`<div class="body">
+  <h1>Readiness to extubate</h1>
+  <p>He passed the SAT, the SBT, and the RSBI. But Respiratory flagged a <b>negative cuff leak</b> at day 5. Your call:</p>
+  <button class="btn ghost" onclick="t7ba(0)">Extubate — he passed everything else</button>
+  <button class="btn ghost" onclick="t7ba(1)">Hold — negative leak, airway-edema risk</button>
+  <div id="t7out"></div></div>`+foot(); }
+function t7ba(x){
+  const o=document.getElementById('t7out');
+  if(x===1){ o.innerHTML='<div class="npc"><span class="who">Dr. Okafor (phone)</span>"No leak at day five? Do not pull that tube — you\'ll be re-intubating him through an edematous airway. Hold it, start dexamethasone, re-test the leak in the morning. Good catch calling me."</div><div class="fb"><span class="ok">✓ You held the tube for the right reason.</span></div>'+codeBlock('0 7 3 0','The time of the provider\'s hold order.'); }
+  else o.innerHTML='<div class="dead"><h2>Post-extubation stridor</h2>Within minutes he\'s stridorous and working hard — now you\'re re-intubating an edematous airway. A negative cuff leak at day 5 is a hold, not a go. Go back.</div>';
+}
+
+/* --- router --- */
+const routes={ t1:t1, t2:t2, t3:t3, t4:t4, t5:t5,
+  t6:()=>t6(false), t6b:()=>t6(true), t7:t7, t7b:t7b };
+function render(){
+  const h=(location.hash||'#t1').slice(1).toLowerCase();
+  const app=document.getElementById('app');
+  // reset quiz state on route change
+  for(const k in t2sel) delete t2sel[k];
+  if(routes[h]) app.innerHTML=routes[h]();
+  else app.innerHTML=header('Wake Up &amp; Breathe')+'<div class="notfound"><h1>Tap a bedside tag</h1><p>This page opens from the NFC tags in the room.<br>Add #t1…#t7 to the address to preview.</p></div>';
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', render);
+render();
+</script>
+</body>
+</html>

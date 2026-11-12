@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ventilator — Bed 2</title>
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:"Segoe UI",Arial,sans-serif;color:#e8eef5}
+  #stage{position:fixed;inset:0;display:flex;flex-direction:column;background:#0a0e14}
+  .topbar{height:6%;min-height:34px;background:#141b26;border-bottom:1px solid #263345;display:flex;align-items:center;
+    padding:0 16px;gap:16px;font-size:16px}
+  .mode{background:#1d6fb8;color:#fff;font-weight:800;padding:5px 14px;border-radius:5px;letter-spacing:.5px;font-size:17px}
+  .pt{color:#9fb0c4;font-size:14px}
+  .bell{margin-left:auto;color:#6b7a8d;font-size:20px}
+  .main{flex:1;display:flex;min-height:0}
+  .waves{flex:1;display:flex;flex-direction:column;min-width:0}
+  canvas{width:100%;flex:1;display:block}
+  .wlabel{position:absolute;font-size:13px;font-weight:700;letter-spacing:.5px;padding:2px 6px}
+  .numcol{width:200px;background:#0c1118;border-left:1px solid #263345;display:flex;flex-direction:column}
+  .tile{flex:1;border-bottom:1px solid #1a2330;padding:8px 12px;display:flex;flex-direction:column;justify-content:center}
+  .tile .lab{font-size:12px;color:#8fa0b5;letter-spacing:.5px}
+  .tile .val{font-size:34px;font-weight:800;line-height:1}
+  .tile .u{font-size:12px;color:#8fa0b5}
+  .yel{color:#ffd23c}.grn{color:#45d17a}.cyn{color:#36c6e0}.wht{color:#eef3f9}
+  .bottombar{height:16%;min-height:70px;background:#121925;border-top:1px solid #263345;display:flex}
+  .dial{flex:1;border-right:1px solid #1a2330;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+  .dial .l{font-size:12px;color:#8fa0b5;letter-spacing:.5px;text-transform:uppercase}
+  .dial .v{font-size:30px;font-weight:800;color:#eef3f9}
+  .dial .u{font-size:11px;color:#6b7a8d}
+  .hintkey{position:fixed;bottom:4px;right:8px;font-size:10px;color:#2d3a4c}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="topbar">
+    <span class="mode" id="modeTag">VOLUME CONTROL</span>
+    <span class="pt">KELLER, R · Adult · <span id="clock"></span></span>
+    <span class="bell">🔕</span>
+  </div>
+  <div class="main">
+    <div class="waves" style="position:relative">
+      <div class="wlabel yel" style="top:2px;left:6px">Paw  cmH₂O</div>
+      <canvas id="cPaw"></canvas>
+      <div class="wlabel grn" style="top:33.5%;left:6px" id="lblFlow">Flow  L/min</div>
+      <canvas id="cFlow"></canvas>
+      <div class="wlabel cyn" style="top:67%;left:6px" id="lblVol">Volume  mL</div>
+      <canvas id="cVol"></canvas>
+    </div>
+    <div class="numcol" id="numcol"></div>
+  </div>
+  <div class="bottombar" id="bottombar"></div>
+</div>
+<div class="hintkey">B = vented (full support) · S = SBT (pressure support) · F11 = fullscreen · syncs all screens</div>
+
+<script>
+/* ===== Mr. Keller ventilator display — ambient prop. States: VC (start) / SBT (pressure support).
+   Switch with #vc / #sbt in the URL, or press V / S. Default = VC. ===== */
+const STATES = {
+  vc: {
+    mode:"VOLUME CONTROL", rr:16, jitter:0.03, inspFrac:0.33, spont:false,
+    nums:[["Ppeak","22","cmH₂O","yel"],["Pmean","8","cmH₂O","yel"],["PEEP","5","cmH₂O","yel"],
+          ["RR","18","/min","grn"],["VTe","450","mL","cyn"],["MVe","8.1","L/min","cyn"]],
+    dials:[["O₂","40","%"],["Set RR","16","/min"],["VT","450","mL"],["PEEP","5","cmH₂O"],["I:E","1:2",""]]
+  },
+  sbt: {
+    mode:"PRESSURE SUPPORT", rr:26, jitter:0.14, inspFrac:0.40, spont:true,
+    nums:[["Ppeak","13","cmH₂O","yel"],["Pmean","7","cmH₂O","yel"],["PEEP","5","cmH₂O","yel"],
+          ["RR","26","/min","grn"],["VTe","400","mL","cyn"],["MVe","10.4","L/min","cyn"]],
+    dials:[["O₂","40","%"],["PS","8","cmH₂O"],["PEEP","5","cmH₂O"],["Trigger","2","L/min"]]
+  }
+};
+let cur = (location.hash.replace('#','')||'vc'); if(!STATES[cur]) cur='vc';
+let S = STATES[cur];
+
+function buildPanels(){
+  S = STATES[cur];
+  document.getElementById('modeTag').textContent = S.mode;
+  const nc = document.getElementById('numcol'); nc.innerHTML='';
+  S.nums.forEach(n=>{ const d=document.createElement('div'); d.className='tile';
+    d.innerHTML=`<div class="lab">${n[0]}</div><div class="val ${n[3]}">${n[1]}</div><div class="u">${n[2]}</div>`; nc.appendChild(d); });
+  const bb=document.getElementById('bottombar'); bb.innerHTML='';
+  S.dials.forEach(x=>{ const d=document.createElement('div'); d.className='dial';
+    d.innerHTML=`<div class="l">${x[0]}</div><div class="v">${x[1]}</div><div class="u">${x[2]}</div>`; bb.appendChild(d); });
+}
+
+const cv = ["cPaw","cFlow","cVol"].map(id=>{ const c=document.getElementById(id); return {c, x:c.getContext('2d')}; });
+function resize(){ cv.forEach(o=>{ o.c.width=o.c.clientWidth; o.c.height=o.c.clientHeight; o.x.fillStyle="#0a0e14"; o.x.fillRect(0,0,o.c.width,o.c.height); }); }
+window.addEventListener('resize', resize);
+
+// breath clock
+let breathT=0, period=60/S.rr, nextPeriod=period;
+function newPeriod(){ const base=60/S.rr; return base*(1 + (Math.random()*2-1)*S.jitter); }
+
+const COL=["#ffd23c","#45d17a","#36c6e0"];
+let px=0; // shared cursor across the three canvases
+const SPEED=160; // px per second sweep
+
+function paw(ph){ // airway pressure, phase 0..1 within a breath
+  const peep=5;
+  if(!S.spont){ // VC: fast rise to plateau, fall to PEEP
+    if(ph<S.inspFrac){ const t=ph/S.inspFrac; return peep + (22-peep)*Math.min(1,t*3); }
+    return peep + (22-peep)*Math.max(0, 1-(ph-S.inspFrac)/0.08)*0; // expiratory = PEEP baseline
+  } else { // PS: rounded support bump to ~13 then back to PEEP
+    if(ph<S.inspFrac){ const t=ph/S.inspFrac; return peep + (13-peep)*Math.sin(Math.PI*Math.min(1,t)); }
+    return peep;
+  }
+}
+function flow(ph){ // L/min, +insp / -exp
+  if(ph<S.inspFrac){ const t=ph/S.inspFrac; return S.spont? 40*Math.sin(Math.PI*t) : 45*(1-t*0.5); }
+  const te=(ph-S.inspFrac)/(1-S.inspFrac); return -55*Math.exp(-te*4);
+}
+function vol(ph){ // mL
+  const vt = S.spont?400:450;
+  if(ph<S.inspFrac){ return vt*(ph/S.inspFrac); }
+  const te=(ph-S.inspFrac)/(1-S.inspFrac); return vt*Math.exp(-te*3);
+}
+// map value ranges to canvas y
+function mapY(h, v, lo, hi){ return h - ((v-lo)/(hi-lo))*h*0.86 - h*0.07; }
+
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  const w=cv[0].c.width;
+  const steps=Math.max(1, Math.round(SPEED*dt));
+  const tpp = 1/SPEED; // seconds of breath-time per pixel advanced
+  for(let s=0; s<steps; s++){
+    breathPhaseAdvance(tpp);
+    const ph = breathT/nextPeriod;
+    drawCol(0, w, paw(ph), 0, 30);
+    drawCol(1, w, flow(ph), -60, 60);
+    drawCol(2, w, vol(ph), 0, 500);
+    px+=1; if(px>=w) px=0;
+  }
+  requestAnimationFrame(frame);
+}
+function breathPhaseAdvance(tpp){
+  breathT += tpp;
+  if(breathT>=nextPeriod){ breathT=0; nextPeriod=newPeriod(); }
+}
+function drawCol(i, w, val, lo, hi){
+  const o=cv[i], ctx=o.x, h=o.c.height;
+  // erase a band ahead
+  ctx.fillStyle="#0a0e14"; ctx.fillRect(px, 0, 14, h);
+  // baseline grid dot
+  const y=mapY(h, val, lo, hi);
+  if(!o.prev) o.prev={x:px,y};
+  ctx.strokeStyle=COL[i]; ctx.lineWidth=2; ctx.beginPath();
+  if(px===0){ o.prev={x:0,y}; }
+  ctx.moveTo(o.prev.x, o.prev.y); ctx.lineTo(px, y); ctx.stroke();
+  o.prev={x:px,y};
+}
+
+function setClock(){ const d=new Date(); document.getElementById('clock').textContent=
+  d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+setInterval(setClock, 10000); setClock();
+
+/* ---- sync via BroadcastChannel('wub'): shared modes baseline/sbt/pain ----
+   vent maps baseline & pain -> vc (controlled), sbt -> sbt (pressure support). */
+let bc; try{ bc=new BroadcastChannel('wub'); }catch(e){}
+function setMode(m, broadcast){
+  // B/baseline -> volume control ; S/sbt -> pressure support ; pain leaves the vent as-is
+  if(m==='sbt' && cur!=='sbt'){ cur='sbt'; location.hash='sbt'; reset(); }
+  else if(m==='baseline' && cur!=='vc'){ cur='vc'; location.hash='vc'; reset(); }
+  if(broadcast && bc) bc.postMessage({mode:m});
+}
+if(bc) bc.onmessage=(e)=>{ if(e.data&&e.data.mode) setMode(e.data.mode,false); };
+window.addEventListener('keydown', e=>{ const k=e.key.toLowerCase();
+  if(k==='b'||k==='v'){ setMode('baseline',true); }   // B = vented (full support)
+  if(k==='s'){ setMode('sbt',true); }                 // S = SBT (pressure support)
+  if(k==='p'){ setMode('pain',true); }                // P = pain: syncs monitor, vent unchanged
+});
+window.addEventListener('hashchange', ()=>{ const h=location.hash.replace('#',''); if(STATES[h]){cur=h; reset();} });
+function reset(){ buildPanels(); breathT=0; nextPeriod=newPeriod(); resize(); cv.forEach(o=>o.prev=null); px=0; }
+
+buildPanels(); resize(); nextPeriod=newPeriod();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

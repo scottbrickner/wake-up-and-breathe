@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infusion System — Bed 2</title>
+<style>
+  html,body{margin:0;height:100%;background:#20262b;overflow:hidden;font-family:"Segoe UI",Arial,sans-serif;color:#2a2f33}
+  #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(1200px 700px at 50% 0%,#2b333a,#141a1e)}
+  .system{display:flex;align-items:stretch;height:94%;max-height:780px;
+    filter:drop-shadow(0 20px 44px rgba(0,0,0,.65));transform-origin:center}
+  /* ---------- PUMP MODULE ---------- */
+  .mod{width:148px;background:linear-gradient(180deg,#f2f4f5,#dfe3e6);border:2px solid #c3c8cc;
+    display:flex;flex-direction:column;padding:8px 9px 10px;position:relative}
+  .mod.first{border-radius:12px 4px 4px 12px}
+  .mod.lastleft{border-right:none}
+  .indic{display:flex;justify-content:space-between;font-size:8px;font-weight:800;color:#5a646b;letter-spacing:.3px;padding:0 2px 5px}
+  .indic span{display:flex;flex-direction:column;align-items:center;gap:3px}
+  .indic i{width:9px;height:9px;border-radius:50%;background:#49525a;display:block}
+  .indic .infuse i.on{background:#39e06f;box-shadow:0 0 8px #39e06f}
+  .indic .alarm i.on{background:#ff4040;box-shadow:0 0 8px #ff4040}
+  .indic .standby i.on{background:#ffb020;box-shadow:0 0 8px #ffb020}
+  .brand{font-size:11px;font-weight:800;color:#6b7781;text-align:center;letter-spacing:.3px;margin-bottom:5px}
+  .led{background:#02110a;border:2px solid #0a2416;border-radius:4px;padding:7px 8px;position:relative;min-height:116px;display:flex;flex-direction:column}
+  .led .ratelab{font-size:8px;letter-spacing:1px;color:#2f7f55;font-weight:700}
+  .led .rate{font-family:"Courier New",monospace;font-size:34px;font-weight:900;color:#28e0ff;
+    text-shadow:0 0 10px rgba(40,224,255,.55);line-height:1;letter-spacing:1px}
+  .led .rateu{font-size:9px;color:#2f8fa0}
+  .led .drug{font-family:"Courier New",monospace;font-size:13px;font-weight:800;color:#28e0ff;
+    letter-spacing:1px;margin-top:6px;text-shadow:0 0 7px rgba(40,224,255,.5)}
+  .led .vtbi{font-size:9px;color:#2f8fa0;margin-top:auto}
+  .led .chbox{position:absolute;top:7px;right:8px;width:24px;height:30px;background:#1a0f00;border:1px solid #3a2600;
+    border-radius:3px;display:flex;align-items:center;justify-content:center;
+    font-family:"Courier New",monospace;font-size:22px;font-weight:900;color:#ffae1f;text-shadow:0 0 8px rgba(255,174,31,.6)}
+  .led.off .rate,.led.off .drug{color:#1f5f45;text-shadow:none}
+  .led.off .chbox{color:#5a4210;text-shadow:none}
+  .keys{margin-top:8px;display:flex;flex-direction:column;gap:5px}
+  .csel{background:#16a0a8;border:1px solid #0d7a80;color:#fff;border-radius:16px;padding:7px;font-size:10px;font-weight:800;text-align:center;letter-spacing:.3px}
+  .hk{background:#d4d8db;border:1px solid #b0b5b9;border-radius:6px;padding:7px 4px;font-size:10px;font-weight:800;color:#3a4248;text-align:center;cursor:pointer}
+  .hk:active{transform:scale(.96)}
+  .hk.off{background:#e7bcbc;border-color:#cf9a9a;color:#5a1414}
+  .hk.restart{background:#bfe7c6;border-color:#8fcf9a;color:#14501f}
+  .hk.dim{opacity:.4;pointer-events:none}
+  .clamp{font-size:7.5px;color:#8a949b;text-align:center;margin-top:6px;line-height:1.2}
+  /* ---------- PC UNIT ---------- */
+  .pcu{width:330px;background:linear-gradient(180deg,#eef1f3,#d8dce0);border:2px solid #bcc1c6;
+    display:flex;flex-direction:column;padding:10px 12px;align-items:stretch}
+  .pcu.mid{border-left:none;border-right:none}
+  .pcu .top{font-size:12px;font-weight:800;color:#6b7781;text-align:center;letter-spacing:1px;padding:2px 0 6px}
+  .scr-wrap{display:flex;align-items:stretch;gap:6px;flex:1;min-height:0}
+  .arrows{display:flex;flex-direction:column;justify-content:space-around;gap:4px}
+  .arrows div{width:22px;height:22px;background:#2f6fb0;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .screen{flex:1;background:#0a1830;border:3px solid #26406a;border-radius:4px;display:flex;flex-direction:column;overflow:hidden;color:#d7e6ff}
+  .scrhead{background:#13294a;padding:5px 8px;border-bottom:1px solid #1e3a66}
+  .scrhead .nf{color:#ffd23c;font-weight:800;font-size:11px;letter-spacing:.5px}
+  .scrhead .ds{color:#7fb0d8;font-size:10px}
+  .scrbody{flex:1;padding:8px}
+  .crow{display:flex;align-items:center;gap:6px;padding:6px 4px;border-bottom:1px solid #152d50;font-size:12px}
+  .crow .cl{color:#ffd23c;font-weight:900;width:14px}
+  .crow .cd{flex:1;color:#eaf4ff}
+  .crow .cr{font-weight:800;color:#5fe08f}
+  .crow .bar{height:5px;background:#0f244a;border:1px solid #1e3a66;border-radius:3px;width:70px;overflow:hidden}
+  .crow .bar i{display:block;height:100%;background:#2f6fb0}
+  .crow.off .cr{color:#8aa0b5}.crow.off .cl{color:#8a7a3a}
+  .pid{color:#7fb0d8;font-size:10px;padding:6px 4px}
+  .scrfoot{display:flex;gap:4px;padding:5px 6px;border-top:1px solid #1e3a66}
+  .scrfoot div{flex:1;background:#13294a;border:1px solid #26406a;border-radius:3px;text-align:center;font-size:9px;color:#a9cdee;padding:4px 2px;font-weight:700}
+  .ctrls{display:flex;align-items:center;gap:6px;margin-top:8px}
+  .silence{background:#c0392b;border:1px solid #96291d;color:#fff;border-radius:16px;padding:7px 12px;font-size:10px;font-weight:800}
+  .opt{background:#d4d8db;border:1px solid #b0b5b9;border-radius:14px;padding:7px 12px;font-size:10px;font-weight:800;color:#3a4248}
+  .sys{margin-left:auto;background:#2f6fb0;color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;text-align:center;line-height:1}
+  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px;flex:none}
+  .keypad button{background:#cfd4d9;border:1px solid #aeb4ba;border-radius:7px;height:24px;font-size:10px;font-weight:800;color:#3a4248}
+  .keypad .wide{font-size:9px}
+  /* msg */
+  .msgwrap{position:fixed;left:0;right:0;bottom:14px;display:flex;justify-content:center;pointer-events:none}
+  .msg{max-width:760px;background:#0b1c13;border:1px solid #1f3a2b;border-radius:12px;padding:12px 20px;text-align:center;font-size:16px;font-weight:600;color:#dfeee6}
+  .msg.ok{color:#5fe08f;border-color:#2b6b45}.msg.warn{color:#ffb23c;border-color:#6b5420}.msg.bad{color:#ff7a7a;border-color:#6b2020}
+  .hintkey{position:fixed;bottom:3px;right:8px;font-size:10px;color:#4a545c}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="system" id="system"></div>
+</div>
+<div class="msgwrap"><div class="msg" id="msg">Run the awakening trial. Stop what an SAT silences — press a module's CHANNEL OFF.</div></div>
+<div class="hintkey">CHANNEL OFF = stop · RESTART = resume · R = reset all</div>
+
+<script>
+/* ===== Mr. Keller — Alaris-System-style infusion prop (PCU + 3 pump modules), modeled on BD Alaris
+   PCU 8015 + 8100 modules (reference photos). Original device-style, no brand wordmarks.
+   Nurse stops a channel with CHANNEL OFF, resumes with RESTART.
+   Correct SAT = stop the sedative (dex), keep analgesia + heparin.
+   Broadcasts shared 'wub' modes so the monitor reacts (pain if analgesia stopped). ===== */
+const ORDER=["A","B","C"];
+const CH = {
+  A:{ drug:"DEXMED",  full:"Dexmedetomidine", mlh:"8.1",  rate:"0.6", unit:"mcg/kg/h", vtbi:"48",  pct:60, kind:"sedative",  running:true },
+  B:{ drug:"FENTANYL",full:"Fentanyl",        mlh:"5.0",  rate:"50",  unit:"mcg/h",    vtbi:"40",  pct:40, kind:"analgesic", running:true },
+  C:{ drug:"HEPARIN", full:"Heparin",         mlh:"12.0", rate:"1200",unit:"units/h",  vtbi:"220", pct:80, kind:"anticoag",  running:true }
+};
+let bc; try{ bc=new BroadcastChannel('wub'); }catch(e){}
+function broadcast(mode){ if(bc) bc.postMessage({mode}); }
+
+function moduleHTML(k, cls){
+  const c=CH[k], on=c.running;
+  return `<div class="mod ${cls}">
+    <div class="indic">
+      <span class="alarm">ALARM<i></i></span>
+      <span class="infuse">INFUSE<i class="${on?'on':''}"></i></span>
+      <span class="standby">STANDBY<i class="${on?'':'on'}"></i></span>
+    </div>
+    <div class="brand">Infusion Pump</div>
+    <div class="led ${on?'':'off'}">
+      <div class="chbox">${k}</div>
+      <div class="ratelab">RATE mL/h</div>
+      <div class="rate">${on?c.mlh:'----'}</div>
+      <div class="drug">${c.drug}</div>
+      <div class="vtbi">${on?c.rate+' '+c.unit:'STOPPED'}<br>VTBI ${c.vtbi} mL</div>
+    </div>
+    <div class="keys">
+      <div class="csel">CHANNEL SELECT</div>
+      <div class="hk">PAUSE</div>
+      <div class="hk off ${on?'':'dim'}" onclick="chOff('${k}')">CHANNEL OFF</div>
+      <div class="hk restart ${on?'dim':''}" onclick="restart('${k}')">RESTART</div>
+    </div>
+    <div class="clamp">Close clamp before<br>opening door</div>
+  </div>`;
+}
+function pcuHTML(){
+  const rows=ORDER.map(k=>{ const c=CH[k];
+    return `<div class="crow ${c.running?'':'off'}"><span class="cl">${k}</span><span class="cd">${c.full}</span>
+      <span class="cr">${c.running?c.rate+' '+c.unit:'OFF'}</span>
+      <span class="bar"><i style="width:${c.running?c.pct:0}%"></i></span></div>`; }).join('');
+  return `<div class="pcu mid">
+    <div class="top">· · ·  POINT-OF-CARE UNIT  · · ·</div>
+    <div class="scr-wrap">
+      <div class="arrows"><div>▶</div><div>▶</div><div>▶</div></div>
+      <div class="screen">
+        <div class="scrhead"><div class="nf">NOT FOR HUMAN USE — SIMULATION</div><div class="ds">Adult dataset · v9A</div></div>
+        <div class="scrbody">${rows}<div class="pid">Patient ID: KELLER-713-55-02 · Bed 2</div></div>
+        <div class="scrfoot"><div>Volume Infused</div><div>Audio Adjust</div></div>
+      </div>
+      <div class="arrows"><div>◀</div><div>◀</div><div>◀</div></div>
+    </div>
+    <div class="ctrls"><div class="silence">SILENCE</div><div class="opt">OPTIONS</div>
+      <div class="sys">SYSTEM<br>ON</div></div>
+    <div class="keypad">
+      <button>1</button><button>2</button><button>3</button>
+      <button>4</button><button>5</button><button>6</button>
+      <button>7</button><button>8</button><button>9</button>
+      <button class="wide">CLEAR</button><button>0</button><button class="wide">ENTER</button>
+    </div>
+  </div>`;
+}
+function render(){
+  const s=document.getElementById('system');
+  s.innerHTML = moduleHTML('A','first') + moduleHTML('B','lastleft') + pcuHTML() + moduleHTML('C','last');
+  fit();
+}
+function setMsg(t,cls){ const m=document.getElementById('msg'); m.textContent=t; m.className='msg '+(cls||''); }
+function evaluate(){
+  const dexOn=CH.A.running, fentOn=CH.B.running, hepOn=CH.C.running;
+  if(!fentOn){ broadcast('pain'); setMsg("Analgesia stopped — CPOT climbing, HR up. Pain is not sedation. RESTART fentanyl.","bad"); return; }
+  if(!hepOn && dexOn){ broadcast('baseline'); setMsg("Heparin is DVT therapy — nothing to do with the awakening trial. RESTART it.","warn"); return; }
+  if(dexOn){ broadcast('baseline'); setMsg("He's still sedated. An SAT turns the sedative OFF — which channel is the sedative?","warn"); return; }
+  if(!hepOn){ broadcast('baseline'); setMsg("Close — but you also stopped his DVT heparin. RESTART it; stop only the sedative.","warn"); return; }
+  broadcast('baseline'); setMsg("✓ Sedation paused · analgesia continues. Awakening trial started — go assess him for arousal.","ok");
+}
+function chOff(k){ CH[k].running=false; render(); evaluate(); }
+function restart(k){ CH[k].running=true; render(); evaluate(); }
+function reset(){ ORDER.forEach(k=>CH[k].running=true); render(); setMsg("Run the awakening trial. Stop what an SAT silences — press a module's CHANNEL OFF.",""); broadcast('baseline'); }
+window.addEventListener('keydown',e=>{ if(e.key.toLowerCase()==='r') reset(); });
+function fit(){ const sys=document.getElementById('system'); sys.style.transform='scale(1)';
+  const sw=sys.scrollWidth, avail=window.innerWidth-40; if(sw>avail){ sys.style.transform='scale('+(avail/sw)+')'; } }
+window.addEventListener('resize', fit);
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wake Up &amp; Breathe — SAT/SBT Escape Room</title>
+<style>
+  :root{--cardinal:#990000;--cardinal-br:#c01414;--gold:#FFC72C;--slate:#16202E;--slate2:#1f2c3d;
+    --off:#F4F1EB;--green:#157A4A;--amber:#E8A33D;--line:rgba(255,255,255,.12);--muted:#9fb0c4}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;
+    background:radial-gradient(1200px 700px at 50% -10%,#22344b 0%,var(--slate) 55%,#0e1620 100%);
+    color:var(--off);min-height:100vh;-webkit-font-smoothing:antialiased}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(14,22,32,.9);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:10px 16px}
+  .brand{font-weight:800;letter-spacing:.5px;font-size:13px;color:#fff;white-space:nowrap}
+  .brand .d{color:var(--cardinal-br)}
+  .locks{flex:1;display:flex;gap:6px;justify-content:center}
+  .locks .lk{font-size:18px;opacity:.3}
+  .locks .lk.open{opacity:1}
+  .clock{font-variant-numeric:tabular-nums;font-weight:800;font-size:15px;color:#ffd9d9;min-width:58px;text-align:right}
+  .wrap{max-width:620px;margin:0 auto;padding:0 20px 70px}
+  .screen{display:none;animation:fade .4s ease}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
+    border:1px solid var(--line);border-radius:18px;padding:30px;margin-top:26px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+  .kick{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cardinal-br);font-weight:800;margin:0 0 8px}
+  h1{font-size:40px;line-height:1.05;margin:0 0 12px;color:#fff;font-weight:900;letter-spacing:-.5px}
+  h2{font-size:26px;margin:0 0 12px;color:#fff;font-weight:800}
+  p{line-height:1.6;color:#dfe6ef;font-size:17px}
+  .riddle{font-size:22px;font-style:italic;color:var(--off);line-height:1.55;margin:14px 0 20px}
+  .muted{color:var(--muted);font-size:15px}
+  .pill{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:99px;
+    padding:4px 12px;font-size:12px;color:#cdd7e3;margin:0 6px 6px 0}
+  .btn{appearance:none;border:0;cursor:pointer;font-weight:800;font-size:17px;border-radius:13px;padding:15px 24px;
+    background:var(--cardinal);color:#fff;margin:8px 0;display:inline-block}
+  .btn:active{transform:scale(.98)} .btn:hover{background:var(--cardinal-br)}
+  .btn.ghost{background:var(--slate2);border:1px solid var(--line);color:#eef3f9;width:100%;text-align:left}
+  .btn.block{display:block;width:100%;text-align:center}
+  .lockin{display:flex;gap:10px;margin:8px 0;flex-wrap:wrap}
+  input[type=text]{flex:1;min-width:160px;background:#0e1620;border:1px solid var(--line);color:#fff;font-size:22px;
+    letter-spacing:4px;border-radius:12px;padding:14px 16px;text-align:center;font-weight:800}
+  input[type=text]:focus{outline:2px solid var(--cardinal-br)}
+  .fb{min-height:24px;font-weight:700;margin-top:10px;font-size:16px}
+  .fb.ok{color:#6fd99f}.fb.bad{color:#ff9d9d}
+  .qmark{float:right;background:var(--slate2);border:1px solid var(--line);color:var(--gold);border-radius:50%;
+    width:36px;height:36px;font-weight:800;font-size:17px;cursor:pointer}
+  .hintbox{display:none;background:rgba(255,199,44,.08);border:1px solid rgba(255,199,44,.35);border-radius:10px;
+    padding:12px 14px;margin-top:12px;color:#ffe9b3;font-size:15px}
+  .panel{background:var(--slate2);border-left:6px solid var(--gold);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .npc{border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:12px;padding:14px 16px;margin:12px 0;
+    background:rgba(255,199,44,.05);font-style:italic;color:#ffeccb;font-size:16px}
+  .npc .who{font-style:normal;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:800;display:block;margin-bottom:6px}
+  .findgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+  .find{border:1px solid var(--line);border-radius:14px;padding:16px;background:rgba(255,255,255,.04);cursor:pointer;text-align:center}
+  .find:hover{border-color:var(--cardinal-br)} .find.seen{border-color:var(--green)}
+  .find .ic{font-size:28px}.find .nm{font-weight:800;margin-top:6px}
+  .findcard{border:1px solid var(--line);border-left:5px solid var(--cardinal);border-radius:12px;padding:14px 16px;margin:10px 0;background:rgba(255,255,255,.03);font-size:15px}
+  .findcard .src{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:800}
+  .pins{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:22px 0}
+  .pin{width:150px;border:0;border-radius:14px;padding:26px 14px;color:#fff;font-weight:800;font-size:16px;cursor:pointer;text-align:center}
+  .pin:active{transform:scale(.97)}
+  .p1{background:linear-gradient(160deg,#c33,#7a0000)}.p2{background:linear-gradient(160deg,#3a5da8,#1c2f5e)}.p3{background:linear-gradient(160deg,#7a7a7a,#3a3a3a)}
+  .toggle{font-size:13px;color:var(--muted);margin-top:14px;cursor:pointer;display:inline-block;border-bottom:1px dashed var(--muted)}
+  .deb li{margin:10px 0;font-size:17px;color:#eef3f9}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">WAKE UP <span class="d">&amp;</span> BREATHE</div>
+  <div class="locks" id="locks"></div>
+  <div class="clock" id="clock">45:00</div>
+</div>
+<div class="wrap" id="app"></div>
+
+<script>
+/* =========================================================================
+   WAKE UP & BREATHE — main room spine (Genially replacement), single HTML.
+   Swap patients by editing CFG below. Branch: add ?b=nc to the URL, or use
+   the toggle on the cover, for the No-Cuff-Leak run.
+   ========================================================================= */
+const BRANCH = new URLSearchParams(location.search).get('b')==='nc' ? 'nc' : 'clean';
+let branch = BRANCH;
+
+const CFG = {
+  title:"WAKE UP & BREATHE",
+  subtitle:"An ICU escape room · Mr. Keller, Day 5 · 45 minutes",
+  tagline:"One patient. One question: is today the day the tube comes out?",
+  minutes:45,
+  handoffAudio:"audio/kel_01_handoff.mp3",   // drop the mp3 here in the repo (optional)
+  handoffText:"“Day five. COPD and pneumonia, hypercapnic when he came in — he’s a CO2 retainer, so his gas looks acidotic but that’s his baseline, don’t chase it. Off pressors, afebrile two days. Dex and fentanyl, RASS goal zero. That shaking on admission was rigors, not a seizure — neuro cleared it. Day team wants to know if the tube comes out today.”",
+  story:"Raymond Keller, 58. COPD + community-acquired pneumonia, intubated 5 days ago for hypercapnic failure. CKD. Full code. Improving — off pressors, afebrile 48 h.",
+  finds:[
+    ["🨪","Wristband","KELLER, Raymond · 58M · MRN 713-55-02 · Day 5 · Full code. PMH COPD (home 2L O2), CKD 3, remote DVT. No home anti-epileptics. Day-1 shaking = rigors, EEG negative."],
+    ["📈","Monitor","RASS 0 · HR 88 · BP 128/72 · RR 18 · SpO2 91% (target 88–92) · afebrile. Troponin 0.07→0.06 flat (chronic/CKD)."],
+    ["💉","IV pumps","Dexmedetomidine (RASS goal 0) · Fentanyl (CPOT <3) · Heparin (DVT — not sedation). No paralytic, ever."],
+    ["🫁","Ventilator","Volume Control, set RR 16, Vt 450, FiO2 40%, PEEP 5. ABG pH 7.35 / pCO2 56 / HCO3 30 = compensated COPD baseline. SBT at PS 8."]
+  ],
+  locks:[
+    { name:"THE ROOM", riddle:"Something waits on the bed rail, where his hand would rest. Tap it with your phone and screen him before you touch anything.",
+      hint:"Bed rail. A scale from minus five to plus four — the first thing you chart.", fmt:"one word",
+      accept:["RASS"], ok:"RASS — charted prior, at 15 minutes, then every 30. Now find out if it’s safe to wake him.", bad:"The lock holds. It’s a scale, not a time — minus five to plus four." },
+    { name:"IS IT SAFE TO WAKE HIM?", riddle:"Every answer is already written down. Find his chart — the tag hides under the clip — and screen him as he is RIGHT NOW. History is not an exclusion.",
+      hint:"Clipboard, under the clip. Is anything on that list still happening TODAY?", fmt:"one word",
+      accept:["AWAKE"], ok:"He passes the screen. Now run the trial — follow the tubing to his pumps.", bad:"That’s not what the screen pays out. Finish all eight questions at the chart." },
+    { name:"WAKE HIM UP", riddle:"The trial starts where the sedation does. Three drips run; one sedates, one treats pain, one guards a clot. Silence only what an awakening trial silences.",
+      hint:"Dex is a sedative too — it comes off. Fentanyl stays. Awake = follows a command.", fmt:"one word",
+      accept:["COMMAND"], ok:"He squeezed your hand and showed two fingers. Awake means following a COMMAND — eyes open was never enough. Now watch him like a hawk.", bad:"Not it. The code is what proves a patient is actually awake." },
+    { name:"DON’T BLINK", riddle:"Sedation’s off and he’s awake. His body reports in real time — find the screen that never sleeps and judge what you see.",
+      hint:"Three limits he brushed: RASS over 2, RR over 35, sat under 88. Add them.", fmt:"one number",
+      accept:["125"], ok:"He brushed every limit and broke none. He PASSED the SAT. Your half is done — so who owns the other half?", bad:"Wrong number. Every limit has a threshold AND a clock — add the three he almost hit." },
+    { name:"THE OTHER HALF OF THE PROTOCOL", riddle:"The SAT was yours. The vent is not. Somewhere in this room is a radio — report everything, then take the clearance they give you: the settings, then the minutes.",
+      hint:"The RCP won’t clear you until you report the SAT result and his CURRENT settings. He’s COPD/day 5 — pressure support EIGHT, thirty minutes.", fmt:"3 digits",
+      accept:["830"], ok:"Cleared: pressure support eight, thirty minutes. The trial is running — go read the machine.", bad:"That’s not what Respiratory gave you. Settings first, then the minutes." },
+    { name:"EARN THE NUMBER", riddle:"Thirty-five minutes on pressure support. The machine that’s been breathing for him knows whether he still needs it — go ask it. Bring math.",
+      hint:"RSBI = breaths per minute ÷ tidal volume in LITERS. 26 ÷ 0.40 = 65. The lock is three digits — pad the front.", fmt:"3 digits",
+      accept:["065","65"], ok:"RSBI 65 — under 105. One screen left… and it’s hiding in his orders.", bad:"The lock holds. Liters, not milliliters — and pad the front." }
+  ],
+  // Lock 7 + finale are branch-dependent (see getL7 / finale below)
+};
+
+/* branch-specific Lock 7 */
+function getL7(){
+  if(branch==='nc') return {
+    name:"BETWEEN HIM AND THE DOOR", riddle:"He passed everything — but Respiratory flagged a NEGATIVE cuff leak at day 5. Open his chart at the door and make the call. The correct move earns the code.",
+    hint:"A negative leak at day 5 = airway-edema risk. You HOLD the tube and call the provider. The code is the time of the provider’s hold order.", fmt:"4 digits",
+    accept:["0730","730"], ok:"You held the tube for the right reason — dexamethasone, re-test the leak in the morning. That’s the win.", bad:"Not that one. The code is the minute the provider ordered the hold." };
+  return {
+    name:"BETWEEN HIM AND THE DOOR", riddle:"He passed everything. One screen left — readiness to extubate — and the answer is the minute Respiratory proved his airway would hold. Check his orders at the door.",
+    hint:"No difficult airway, no procedure in 48 h. The code is the RT cuff-leak-POSITIVE timestamp — find it in the note.", fmt:"4 digits",
+    accept:["0545","545"], ok:"0545 — cuff leak positive, airway note clean. He clears the last screen. Go make the call.", bad:"Not that one. The code is the minute his airway was proven — down to the minute, in the RT note." };
+}
+
+/* ---------- engine ---------- */
+let idx=0;            // 0=cover 1=rules 2=report 3=beyond 4..10=locks(1-7) 11=pinata 12=debrief
+let timer=null, t=CFG.minutes*60;
+const app=document.getElementById('app');
+function allLocks(){ return CFG.locks.concat([getL7()]); }
+
+function renderLockStrip(open){
+  const el=document.getElementById('locks'); el.innerHTML='';
+  for(let i=0;i<7;i++){ const s=document.createElement('span'); s.className='lk'+(i<open?' open':''); s.textContent=i<open?'🔓':'🔒'; el.appendChild(s); }
+}
+function norm(s){ return (s||'').trim().toUpperCase().replace(/\s+/g,''); }
+
+function go(n){ idx=n; draw(); window.scrollTo(0,0); }
+function startClock(){ if(timer)return; timer=setInterval(()=>{ t--; if(t<0){t=0;clearInterval(timer);}
+  const m=String(Math.floor(t/60)).padStart(2,'0'), s=String(t%60).padStart(2,'0');
+  document.getElementById('clock').textContent=m+':'+s; if(t<=0)document.getElementById('clock').style.color='#ff6b6b'; },1000); }
+
+function draw(){
+  const L=allLocks();
+  renderLockStrip(idx>=4 ? Math.min(idx-3,7) : 0);
+  if(idx===0){ // cover
+    app.innerHTML=`<div class="card" style="text-align:center;padding:48px 28px">
+      <p class="kick">Keck Critical Care RN Residency · SAT/SBT</p>
+      <h1>${CFG.title}</h1>
+      <p class="muted">${CFG.subtitle}</p>
+      <p>${CFG.tagline}</p>
+      <p><span class="pill">45 minutes</span><span class="pill">Team of 3–4</span><span class="pill">CP 3-162</span></p>
+      <button class="btn" onclick="startClock();go(1)">Start the Shift</button>
+      <div><span class="toggle" id="brtog" onclick="toggleBranch()"></span></div>
+    </div>`; updateBrTog(); return;
+  }
+  if(idx===1){ app.innerHTML=`<div class="card"><p class="kick">How to play</p><h2>The rules</h2>
+    <p>45 minutes. Clues come in order — don’t skip ahead. When you see a tag, <b>tap it with your phone</b> (or scan the QR). Three free hints — the gold <b>?</b> on any lock. Nothing needs force.</p>
+    <p class="muted">Locks live on this screen. The activity lives on the tag. You’ll need both.</p>
+    <button class="btn block" onclick="go(2)">Take report</button></div>`; return; }
+  if(idx===2){ app.innerHTML=`<div class="card"><p class="kick">0700 — Handoff</p><h2>Meet Mr. Keller</h2>
+    <div class="npc"><span class="who">Night-shift RN</span>${CFG.handoffText}
+      <div style="margin-top:10px"><button class="btn" style="padding:10px 18px;font-size:15px" onclick="playHandoff()">▶ Play handoff</button></div></div>
+    <p>${CFG.story}</p>
+    <button class="btn block" onclick="go(3)">Go see him →</button>
+    <audio id="ho" src="${CFG.handoffAudio}" preload="none"></audio></div>`; return; }
+  if(idx===3){ app.innerHTML=`<div class="card"><p class="kick">Beyond the report</p><h2>At the bedside</h2>
+    <p class="muted">Tap each to read his chart. These are reference — no codes here.</p>
+    <div class="findgrid" id="fg"></div><div id="fc"></div>
+    <button class="btn block" id="fnext" style="display:none" onclick="go(4)">Start with Lock 1 →</button></div>`;
+    const fg=document.getElementById('fg');
+    CFG.finds.forEach((f,i)=>{ const d=document.createElement('div'); d.className='find'; d.id='find'+i;
+      d.innerHTML=`<div class="ic">${f[0]}</div><div class="nm">${f[1]}</div>`; d.onclick=()=>openFind(i); fg.appendChild(d); });
+    return; }
+  if(idx>=4 && idx<=10){ // locks 1..7
+    const li=idx-4, lk=L[li];
+    app.innerHTML=`<div class="card"><button class="qmark" onclick="toggleHint()">?</button>
+      <p class="kick">Lock ${li+1} — ${lk.name}</p>
+      <p class="riddle">${lk.riddle}</p>
+      <div class="hintbox" id="hint">${lk.hint}</div>
+      <div class="lockin"><input type="text" id="code" autocomplete="off" autocapitalize="characters" placeholder="code"><button class="btn" onclick="tryCode()">Unlock</button></div>
+      <p class="muted">Enter: ${lk.fmt}</p>
+      <div class="fb" id="fb"></div></div>`;
+    const inp=document.getElementById('code'); inp.focus();
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter')tryCode(); });
+    return; }
+  if(idx===11){ // pinata finale
+    app.innerHTML=`<div class="card" style="text-align:center">
+      <p class="kick">All locks open — one call left</p>
+      <h2>Is it safe to extubate Mr. Keller?</h2>
+      <p class="muted">Whack the piñata you’d stake his lungs on.</p>
+      <div class="pins">
+        <button class="pin p1" onclick="pina('EXTUBATE')">EXTUBATE</button>
+        <button class="pin p2" onclick="pina('RETRY')">RETRY<br>TOMORROW</button>
+        <button class="pin p3" onclick="pina('SEDATE')">NEEDS MORE<br>SEDATION</button>
+      </div><div id="pfb"></div></div>`; return; }
+  if(idx===12){ // debrief
+    app.innerHTML=`<div class="card">
+      <p class="kick">Debrief — before you go</p>
+      <h2>${branch==='nc'?'Right call — you held the tube.':'Extubated. Nice work.'}</h2>
+      <p class="muted">Time remaining: <b>${document.getElementById('clock').textContent}</b></p>
+      <ul class="deb">
+        <li>Which trap nearly got you — the rigors, the dex, the chronic troponin, or his gas?</li>
+        <li>Why is dexmedetomidine turned off for the SAT when it’s “light”?</li>
+        <li>His pH was 7.35 — why wasn’t that an SBT failure? (CO2 retainer, compensated baseline.)</li>
+        <li>The family said he wasn’t ready. Whose assessment governs the call?</li>
+        ${branch==='nc'?'<li>A negative cuff leak at day 5 — why does that stop a patient who passed everything else?</li>':'<li>What would a negative cuff leak have changed about today’s call?</li>'}
+        <li>Next shift, 0700, a vented patient: what moves from your “Observed” column to your “Did” column?</li>
+      </ul>
+      <button class="btn" onclick="location.reload()">Reset room</button></div>`; return; }
+}
+
+/* actions */
+function playHandoff(){ const a=document.getElementById('ho'); if(a){ a.play().catch(()=>{}); } }
+function openFind(i){ document.getElementById('find'+i).classList.add('seen');
+  document.getElementById('fc').innerHTML=`<div class="findcard"><span class="src">${CFG.finds[i][1]} · Chart</span><br>${CFG.finds[i][2]}</div>`;
+  if([0,1,2,3].every(x=>document.getElementById('find'+x).classList.contains('seen')))
+    document.getElementById('fnext').style.display='block'; }
+function toggleHint(){ const h=document.getElementById('hint'); h.style.display=h.style.display==='block'?'none':'block'; }
+function tryCode(){ const li=idx-4, lk=allLocks()[li], fb=document.getElementById('fb');
+  const v=norm(document.getElementById('code').value);
+  if(lk.accept.map(norm).includes(v)){ fb.className='fb ok'; fb.textContent='✓ '+lk.ok;
+    setTimeout(()=>go(idx+1 <=10 ? idx+1 : 11), 1400); }
+  else { fb.className='fb bad'; fb.textContent='✗ '+lk.bad; } }
+function pina(choice){ const correct = branch==='nc' ? 'RETRY' : 'EXTUBATE'; const o=document.getElementById('pfb');
+  if(choice===correct){ o.innerHTML=`<div class="panel" style="border-color:var(--green);border-left-color:var(--green)">🎉 ${branch==='nc'?'Held — and right.':'Pop!'} ${branch==='nc'?'You refused to pull an unsafe tube.':'You didn’t find the answer — you refused to fail him.'}</div>`;
+    setTimeout(()=>go(12),1600); }
+  else if(choice==='SEDATE') o.innerHTML=`<div class="findcard" style="border-left-color:var(--amber)">RASS 0, following commands — sedating a calm, ready patient isn’t caution, it’s another vent day he doesn’t need. Look again.</div>`;
+  else if(choice==='EXTUBATE' && branch==='nc') o.innerHTML=`<div class="findcard" style="border-left-color:var(--amber)">No leak at day 5 — you just risked re-intubating him through a swollen airway. Look again.</div>`;
+  else o.innerHTML=`<div class="findcard" style="border-left-color:var(--amber)">He passed the screen, the SAT, the SBT, the weaning parameters. What would you keep the tube in for? Look again.</div>`; }
+function toggleBranch(){ branch = branch==='nc'?'clean':'nc'; updateBrTog(); }
+function updateBrTog(){ const e=document.getElementById('brtog'); if(e) e.textContent = 'Run: '+(branch==='nc'?'NO-CUFF-LEAK branch (hold)':'CLEAN (ready to extubate)')+' — tap to switch'; }
+
+draw();
+</script>
+</body>
+</html>

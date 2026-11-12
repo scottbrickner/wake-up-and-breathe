@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wake Up &amp; Breathe — Control</title>
+<style>
+  :root{--cardinal:#990000;--gold:#FFC72C;--slate:#16202E;--slate2:#1f2c3d;--line:rgba(255,255,255,.12);--muted:#9fb0c4}
+  html,body{margin:0;min-height:100%;background:var(--slate);color:#eef3f9;font-family:"Segoe UI",Arial,sans-serif}
+  .wrap{max-width:900px;margin:0 auto;padding:28px 22px 60px}
+  h1{font-size:28px;margin:0 0 2px}
+  .sub{color:var(--muted);margin:0 0 24px}
+  h2{font-size:16px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:8px;margin:28px 0 14px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .modebtn{flex:1;min-width:150px;border:1px solid var(--line);background:var(--slate2);color:#eef3f9;border-radius:14px;padding:18px;font-size:17px;font-weight:800;cursor:pointer;text-align:center}
+  .modebtn .d{font-size:13px;font-weight:500;color:var(--muted);margin-top:4px}
+  .modebtn.on{outline:3px solid var(--gold)}
+  .modebtn.baseline.on{background:#123a28}.modebtn.sbt.on{background:#12324a}.modebtn.pain.on{background:#3a1414}
+  .open{display:block;border:1px solid var(--line);background:var(--slate2);color:#eef3f9;border-radius:12px;padding:15px 18px;font-size:16px;font-weight:700;text-decoration:none;margin:8px 0}
+  .open:hover{border-color:var(--gold)} .open .s{font-weight:500;color:var(--muted);font-size:13px}
+  .open.big{background:var(--cardinal);border-color:#7a0000}
+  code{background:#0e1620;border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:#ffe9b3;font-size:14px}
+  .tags{font-size:14px;line-height:1.9}
+  .note{color:var(--muted);font-size:14px;margin-top:8px}
+  .cur{display:inline-block;background:#0e1620;border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-weight:800;color:var(--gold);margin-left:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Wake Up &amp; Breathe — Facilitator Control</h1>
+  <p class="sub">Mr. Keller · Bed 2. Open the screens on your displays, then drive room state below — every screen follows.</p>
+
+  <h2>Run the room</h2>
+  <a class="open big" href="room.html" target="_blank">▶ Open the Escape Room <span class="s">— the locks + codes (team tablet). Add <code>?b=nc</code> for the no-cuff-leak branch.</span></a>
+
+  <h2>Room state <span class="cur" id="cur">BASELINE</span></h2>
+  <div class="row">
+    <button class="modebtn baseline on" id="mb-baseline" onclick="setMode('baseline')">BASELINE<div class="d">Full support · vent VC · HR 88 / RR 18</div></button>
+    <button class="modebtn sbt" id="mb-sbt" onclick="setMode('sbt')">SBT<div class="d">Pressure support 8 · HR 94 / RR 26</div></button>
+    <button class="modebtn pain" id="mb-pain" onclick="setMode('pain')">PAIN<div class="d">Analgesia stopped · HR 110 · CPOT 6</div></button>
+  </div>
+  <p class="note">Shortcut keys work on any device screen too: <code>B</code> vented · <code>S</code> SBT · <code>P</code> pain. The pump broadcasts PAIN automatically if a team stops fentanyl.</p>
+
+  <h2>Device screens (open each on its display, then F11)</h2>
+  <a class="open" href="monitor.html" target="_blank">🫀 Bedside Monitor</a>
+  <a class="open" href="vent.html" target="_blank">🫁 Ventilator</a>
+  <a class="open" href="pump.html" target="_blank">💉 Infusion Pump (interactive)</a>
+  <a class="open" href="tags.html#t1" target="_blank">🔖 NFC Activities <span class="s">— preview the tag pages (#t1…#t7)</span></a>
+
+  <h2>NFC tag URLs</h2>
+  <p class="note">Write these to the chips (this page's address, swap the end). Only the vent + door chips change for the branch.</p>
+  <div class="tags">
+    <code>tags.html#t1</code> bed rail · <code>#t2</code> chart · <code>#t3</code> pumps · <code>#t4</code> monitor<br>
+    <code>#t5</code> radio · <code>#t6</code> vent (branch <code>#t6b</code>) · <code>#t7</code> door (branch <code>#t7b</code>)
+  </div>
+
+  <h2>Reset between teams</h2>
+  <p class="note">Set state to BASELINE here · press <code>R</code> on the pump to restart all channels · click “Reset room” on the room’s debrief screen (or reload room.html).</p>
+</div>
+<script>
+let bc; try{ bc=new BroadcastChannel('wub'); }catch(e){}
+function setMode(m){ ['baseline','sbt','pain'].forEach(x=>document.getElementById('mb-'+x).classList.toggle('on',x===m));
+  document.getElementById('cur').textContent=m.toUpperCase(); if(bc) bc.postMessage({mode:m}); }
+if(bc) bc.onmessage=(e)=>{ if(e.data&&e.data.mode){ const m=e.data.mode;
+  ['baseline','sbt','pain'].forEach(x=>document.getElementById('mb-'+x).classList.toggle('on',x===m));
+  document.getElementById('cur').textContent=m.toUpperCase(); } };
+window.addEventListener('keydown',e=>{ const k=e.key.toLowerCase();
+  if(k==='b')setMode('baseline'); if(k==='s')setMode('sbt'); if(k==='p')setMode('pain'); });
+</script>
+</body>
+</html>

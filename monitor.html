@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bedside Monitor — Bed 2</title>
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:"Segoe UI",Arial,sans-serif;color:#dfe6ef}
+  #stage{position:fixed;inset:0;display:flex;flex-direction:column;background:#000}
+  .top{height:6%;min-height:30px;background:#0c1118;border-bottom:1px solid #1c2735;display:flex;align-items:center;padding:0 14px;gap:14px;font-size:14px;color:#8fa0b5}
+  .top .nm{color:#eef3f9;font-weight:700;font-size:16px}
+  .top .rt{margin-left:auto;display:flex;gap:18px;align-items:center}
+  #banner{display:none;background:#b11818;color:#fff;font-weight:800;text-align:center;padding:6px;letter-spacing:1px;font-size:16px}
+  .main{flex:1;display:flex;min-height:0}
+  .waves{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+  canvas{width:100%;flex:1;display:block}
+  .wl{position:absolute;font-size:13px;font-weight:700;padding:2px 6px;letter-spacing:.5px}
+  .nums{width:240px;background:#05080c;border-left:1px solid #1c2735;display:flex;flex-direction:column}
+  .p{flex:1;border-bottom:1px solid #121a24;padding:6px 14px;display:flex;flex-direction:column;justify-content:center;position:relative}
+  .p .lab{font-size:13px;font-weight:700;letter-spacing:.5px}
+  .p .big{font-weight:800;line-height:.95}
+  .p .sub{position:absolute;right:14px;bottom:8px;font-size:13px;color:#8fa0b5}
+  .grn{color:#3ad17a}.cyn{color:#36c6e0}.yel{color:#ffd23c}.red{color:#ff5a5a}.wht{color:#eef3f9}
+  .hintkey{position:fixed;bottom:4px;right:8px;font-size:10px;color:#1c2735}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="top">
+    <span class="nm">KELLER, Raymond</span><span>58 M · MRN 713-55-02 · Bed 2</span>
+    <span class="rt"><span class="grn" id="statetag">● Monitoring</span><span id="clock"></span></span>
+  </div>
+  <div id="banner"></div>
+  <div class="main">
+    <div class="waves">
+      <div class="wl grn" style="top:2px;left:6px">II</div><canvas id="ecg"></canvas>
+      <div class="wl cyn" style="top:33.5%;left:6px">Pleth</div><canvas id="pleth"></canvas>
+      <div class="wl yel" style="top:67%;left:6px">Resp</div><canvas id="resp"></canvas>
+    </div>
+    <div class="nums">
+      <div class="p"><div class="lab grn">HR  bpm</div><div class="big grn" style="font-size:72px" id="nHR">88</div><div class="sub grn">Sinus</div></div>
+      <div class="p"><div class="lab cyn">SpO₂  %</div><div class="big cyn" style="font-size:64px" id="nSpO2">91</div><div class="sub cyn">Tgt 88–92</div></div>
+      <div class="p"><div class="lab red">NBP  mmHg</div><div class="big red" style="font-size:44px" id="nNBP">128/72</div><div class="sub red" id="nMAP">(91)</div></div>
+      <div class="p"><div class="lab yel">RR  /min</div><div class="big yel" style="font-size:56px" id="nRR">18</div></div>
+      <div class="p"><div class="lab wht">Temp  °C</div><div class="big wht" style="font-size:40px">37.0</div></div>
+    </div>
+  </div>
+</div>
+<div class="hintkey">B = vented (full support) · S = SBT (pressure support) · P = pain · F11 = fullscreen · syncs all screens</div>
+
+<script>
+/* ===== Mr. Keller bedside monitor — ambient prop, state-driven, synced via BroadcastChannel('wub').
+   States: baseline (full support) / sbt (passing trial) / pain (fentanyl stopped). ===== */
+const STATES = {
+  baseline:{ hr:88, spo2:[90,92], nbp:"128/72", map:91, rr:18, tag:"● Monitoring", banner:"" },
+  sbt:{     hr:94, spo2:[89,91], nbp:"132/76", map:95, rr:26, tag:"● SBT in progress", banner:"" },
+  pain:{    hr:110, spo2:[92,94], nbp:"148/88", map:108, rr:24, tag:"● Distress", banner:"PAIN — CPOT 6 · analgesia interrupted" }
+};
+let mode='baseline', S=STATES[mode];
+
+const cv=["ecg","pleth","resp"].map(id=>{const c=document.getElementById(id);return {c,x:c.getContext('2d')};});
+function resize(){ cv.forEach(o=>{o.c.width=o.c.clientWidth;o.c.height=o.c.clientHeight;o.x.fillStyle="#000";o.x.fillRect(0,0,o.c.width,o.c.height);o.prev=null;}); }
+window.addEventListener('resize', resize);
+const COL=["#3ad17a","#36c6e0","#ffd23c"]; const SPEED=200; let px=0;
+let tEcg=0,tPl=0,tRs=0, rr=60/S.hr, rp=60/S.rr;
+
+function ecg(ph){ let v=0,x=ph;
+  v+=0.12*Math.exp(-Math.pow((x-0.12)/0.022,2));
+  v-=0.06*Math.exp(-Math.pow((x-0.20)/0.008,2));
+  v+=1.0*Math.exp(-Math.pow((x-0.23)/0.010,2));
+  v-=0.18*Math.exp(-Math.pow((x-0.26)/0.012,2));
+  v+=0.22*Math.exp(-Math.pow((x-0.44)/0.045,2)); return v; }
+function pleth(ph){ let x=ph; let v=Math.exp(-Math.pow((x-0.18)/0.11,2)); v+=0.45*Math.exp(-Math.pow((x-0.42)/0.10,2)); return v; }
+function resp(ph){ return Math.sin(2*Math.PI*ph)*0.8; }
+function mapY(h,v,lo,hi){ return h-((v-lo)/(hi-lo))*h*0.8-h*0.1; }
+function draw(i,val,lo,hi){ const o=cv[i],ctx=o.x,h=o.c.height; ctx.fillStyle="#000";ctx.fillRect(px,0,16,h);
+  const y=mapY(h,val,lo,hi); if(o.prev==null||px===0)o.prev={x:px,y};
+  ctx.strokeStyle=COL[i];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(o.prev.x,o.prev.y);ctx.lineTo(px,y);ctx.stroke();o.prev={x:px,y}; }
+let last=performance.now();
+function frame(now){ const dt=Math.min(0.05,(now-last)/1000);last=now;
+  const w=cv[0].c.width,steps=Math.max(1,Math.round(SPEED*dt)),tpp=1/SPEED;
+  for(let s=0;s<steps;s++){ tEcg+=tpp;if(tEcg>=rr)tEcg-=rr; tPl+=tpp;if(tPl>=rr)tPl-=rr; tRs+=tpp;if(tRs>=rp)tRs-=rp;
+    draw(0,ecg(tEcg/rr),-0.35,1.15); draw(1,pleth(tPl/rr),-0.1,1.5); draw(2,resp(tRs/rp),-1,1);
+    px++; if(px>=w)px=0; }
+  requestAnimationFrame(frame); }
+
+function applyState(){ S=STATES[mode]; rr=60/S.hr; rp=60/S.rr;
+  document.getElementById('nHR').textContent=S.hr;
+  document.getElementById('nNBP').textContent=S.nbp;
+  document.getElementById('nMAP').textContent='('+S.map+')';
+  document.getElementById('nRR').textContent=S.rr;
+  document.getElementById('statetag').textContent=S.tag;
+  const b=document.getElementById('banner'); if(S.banner){b.style.display='block';b.textContent=S.banner;} else b.style.display='none';
+}
+setInterval(()=>{ const r=STATES[mode].spo2; document.getElementById('nSpO2').textContent = r[0]+Math.floor(Math.random()*(r[1]-r[0]+1)); }, 3500);
+function setClock(){ document.getElementById('clock').textContent=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+setInterval(setClock,10000); setClock();
+
+/* ---- sync ---- */
+let bc; try{ bc=new BroadcastChannel('wub'); }catch(e){}
+function setMode(m, broadcast){ if(!STATES[m])return; mode=m; applyState(); if(broadcast&&bc) bc.postMessage({mode:m}); }
+if(bc) bc.onmessage=(e)=>{ if(e.data&&e.data.mode) setMode(e.data.mode,false); };
+window.addEventListener('keydown',e=>{ const k=e.key.toLowerCase();
+  if(k==='b')setMode('baseline',true); if(k==='s')setMode('sbt',true); if(k==='p')setMode('pain',true); });
+
+applyState(); resize(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>
