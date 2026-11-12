@@ -46,13 +46,14 @@
     </div>
   </div>
 </div>
-<div class="hintkey">B = vented (full support) · S = SBT (pressure support) · P = pain · F11 = fullscreen · syncs all screens</div>
+<div class="hintkey">B = vented · A = SAT (awakening) · S = SBT (pressure support) · P = pain · F11 = fullscreen · syncs all screens</div>
 
 <script>
 /* ===== Mr. Keller bedside monitor — ambient prop, state-driven, synced via BroadcastChannel('wub').
    States: baseline (full support) / sbt (passing trial) / pain (fentanyl stopped). ===== */
 const STATES = {
   baseline:{ hr:88, spo2:[90,92], nbp:"128/72", map:91, rr:18, tag:"● Monitoring", banner:"" },
+  sat:{     hr:96, spo2:[88,90], nbp:"140/82", map:101, rr:32, tag:"● SAT — awakening", banner:"SAT in progress — sedation off · RASS +1 · diaphoretic · watch the failure criteria" },
   sbt:{     hr:94, spo2:[89,91], nbp:"132/76", map:95, rr:26, tag:"● SBT in progress", banner:"" },
   pain:{    hr:110, spo2:[92,94], nbp:"148/88", map:108, rr:24, tag:"● Distress", banner:"PAIN — CPOT 6 · analgesia interrupted" }
 };
@@ -101,7 +102,8 @@ let bc; try{ bc=new BroadcastChannel('wub'); }catch(e){}
 function setMode(m, broadcast){ if(!STATES[m])return; mode=m; applyState(); if(broadcast&&bc) bc.postMessage({mode:m}); }
 if(bc) bc.onmessage=(e)=>{ if(e.data&&e.data.mode) setMode(e.data.mode,false); };
 window.addEventListener('keydown',e=>{ const k=e.key.toLowerCase();
-  if(k==='b')setMode('baseline',true); if(k==='s')setMode('sbt',true); if(k==='p')setMode('pain',true); });
+  if(k==='b')setMode('baseline',true); if(k==='a')setMode('sat',true);
+  if(k==='s')setMode('sbt',true); if(k==='p')setMode('pain',true); });
 
 applyState(); resize(); requestAnimationFrame(frame);
 </script>

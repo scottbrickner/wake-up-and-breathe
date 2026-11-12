@@ -30,7 +30,12 @@
   h1{font-size:40px;line-height:1.05;margin:0 0 12px;color:#fff;font-weight:900;letter-spacing:-.5px}
   h2{font-size:26px;margin:0 0 12px;color:#fff;font-weight:800}
   p{line-height:1.6;color:#dfe6ef;font-size:17px}
-  .riddle{font-size:22px;font-style:italic;color:var(--off);line-height:1.55;margin:14px 0 20px}
+  .riddle{font-size:22px;font-style:italic;color:var(--off);line-height:1.55;margin:14px 0 18px}
+  .nfccard{display:flex;align-items:center;gap:10px;background:#000;border:1px solid #333;border-radius:12px;
+    padding:12px 14px;margin:0 0 18px;font-size:15px;color:#cfd8e2}
+  .nfccard .chip{background:#111;border:1px solid #3a3a3a;color:#eafff3;font-weight:800;font-size:11px;letter-spacing:1px;
+    border-radius:6px;padding:5px 9px;white-space:nowrap}
+  .nfccard b{color:#fff}
   .muted{color:var(--muted);font-size:15px}
   .pill{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:99px;
     padding:4px 12px;font-size:12px;color:#cdd7e3;margin:0 6px 6px 0}
@@ -90,29 +95,29 @@ const CFG = {
   tagline:"One patient. One question: is today the day the tube comes out?",
   minutes:45,
   handoffAudio:"audio/kel_01_handoff.mp3",   // drop the mp3 here in the repo (optional)
-  handoffText:"“Day five. COPD and pneumonia, hypercapnic when he came in — he’s a CO2 retainer, so his gas looks acidotic but that’s his baseline, don’t chase it. Off pressors, afebrile two days. Dex and fentanyl, RASS goal zero. That shaking on admission was rigors, not a seizure — neuro cleared it. Day team wants to know if the tube comes out today.”",
+  handoffText:"“Day five. COPD and pneumonia, hypercapnic when he came in — he’s a CO2 retainer, so his gas looks acidotic but that’s his baseline, don’t chase it. Off pressors, afebrile two days. Propofol and fentanyl, RASS goal minus one. That shaking on admission was rigors, not a seizure — neuro cleared it. Day team wants to know if the tube comes out today.”",
   story:"Raymond Keller, 58. COPD + community-acquired pneumonia, intubated 5 days ago for hypercapnic failure. CKD. Full code. Improving — off pressors, afebrile 48 h.",
   finds:[
     ["🨪","Wristband","KELLER, Raymond · 58M · MRN 713-55-02 · Day 5 · Full code. PMH COPD (home 2L O2), CKD 3, remote DVT. No home anti-epileptics. Day-1 shaking = rigors, EEG negative."],
-    ["📈","Monitor","RASS 0 · HR 88 · BP 128/72 · RR 18 · SpO2 91% (target 88–92) · afebrile. Troponin 0.07→0.06 flat (chronic/CKD)."],
-    ["💉","IV pumps","Dexmedetomidine (RASS goal 0) · Fentanyl (CPOT <3) · Heparin (DVT — not sedation). No paralytic, ever."],
+    ["📈","Monitor","RASS −1 · HR 88 · BP 128/72 · RR 18 · SpO2 91% (target 88–92) · afebrile. Troponin 0.07→0.06 flat (chronic/CKD)."],
+    ["💉","IV pumps","Propofol (RASS goal −1) · Fentanyl (CPOT <3) · Heparin (DVT — not sedation). No paralytic, ever."],
     ["🫁","Ventilator","Volume Control, set RR 16, Vt 450, FiO2 40%, PEEP 5. ABG pH 7.35 / pCO2 56 / HCO3 30 = compensated COPD baseline. SBT at PS 8."]
   ],
   locks:[
-    { name:"THE ROOM", riddle:"Something waits on the bed rail, where his hand would rest. Tap it with your phone and screen him before you touch anything.",
+    { name:"THE ROOM", riddle:"A black NFC card is clipped to the bed rail, where his hand would rest. Tap it, then screen him before you touch anything.",
       hint:"Bed rail. A scale from minus five to plus four — the first thing you chart.", fmt:"one word",
       accept:["RASS"], ok:"RASS — charted prior, at 15 minutes, then every 30. Now find out if it’s safe to wake him.", bad:"The lock holds. It’s a scale, not a time — minus five to plus four." },
-    { name:"IS IT SAFE TO WAKE HIM?", riddle:"Every answer is already written down. Find his chart — the tag hides under the clip — and screen him as he is RIGHT NOW. History is not an exclusion.",
-      hint:"Clipboard, under the clip. Is anything on that list still happening TODAY?", fmt:"one word",
+    { name:"IS IT SAFE TO WAKE HIM?", riddle:"Every answer is already written down. Tap the chart card and screen him as he is RIGHT NOW. History is not an exclusion.",
+      hint:"Tap the chart. Is anything on that exclusion list still happening TODAY?", fmt:"one word",
       accept:["AWAKE"], ok:"He passes the screen. Now run the trial — follow the tubing to his pumps.", bad:"That’s not what the screen pays out. Finish all eight questions at the chart." },
     { name:"WAKE HIM UP", riddle:"The trial starts where the sedation does. Three drips run; one sedates, one treats pain, one guards a clot. Silence only what an awakening trial silences.",
-      hint:"Dex is a sedative too — it comes off. Fentanyl stays. Awake = follows a command.", fmt:"one word",
-      accept:["COMMAND"], ok:"He squeezed your hand and showed two fingers. Awake means following a COMMAND — eyes open was never enough. Now watch him like a hawk.", bad:"Not it. The code is what proves a patient is actually awake." },
+      hint:"Propofol is the sedative — it comes off. Fentanyl stays for pain. Awake = follows a command.", fmt:"one word",
+      accept:["COMMAND"], ok:"He squeezed your hand, showed two fingers, and lifted his head off the pillow — he can protect his airway. Awake means following a COMMAND; eyes open was never enough. Now watch him like a hawk.", bad:"Not it. The code is what proves a patient is actually awake." },
     { name:"DON’T BLINK", riddle:"Sedation’s off and he’s awake. His body reports in real time — find the screen that never sleeps and judge what you see.",
       hint:"Three limits he brushed: RASS over 2, RR over 35, sat under 88. Add them.", fmt:"one number",
       accept:["125"], ok:"He brushed every limit and broke none. He PASSED the SAT. Your half is done — so who owns the other half?", bad:"Wrong number. Every limit has a threshold AND a clock — add the three he almost hit." },
-    { name:"THE OTHER HALF OF THE PROTOCOL", riddle:"The SAT was yours. The vent is not. Somewhere in this room is a radio — report everything, then take the clearance they give you: the settings, then the minutes.",
-      hint:"The RCP won’t clear you until you report the SAT result and his CURRENT settings. He’s COPD/day 5 — pressure support EIGHT, thirty minutes.", fmt:"3 digits",
+    { name:"THE OTHER HALF OF THE PROTOCOL", riddle:"The SAT was yours. The vent is not. Pick up the unit phone, call Respiratory, report everything — then take the clearance they give you: the settings, then the minutes.",
+      hint:"Call Respiratory on the phone. They won’t clear you until you report the SAT result and his CURRENT settings. He’s COPD/day 5 — pressure support EIGHT, thirty minutes.", fmt:"3 digits",
       accept:["830"], ok:"Cleared: pressure support eight, thirty minutes. The trial is running — go read the machine.", bad:"That’s not what Respiratory gave you. Settings first, then the minutes." },
     { name:"EARN THE NUMBER", riddle:"Thirty-five minutes on pressure support. The machine that’s been breathing for him knows whether he still needs it — go ask it. Bring math.",
       hint:"RSBI = breaths per minute ÷ tidal volume in LITERS. 26 ÷ 0.40 = 65. The lock is three digits — pad the front.", fmt:"3 digits",
@@ -135,13 +140,18 @@ function getL7(){
 
 /* ---------- engine ---------- */
 let idx=0;            // 0=cover 1=rules 2=report 3=beyond 4..10=locks(1-7) 11=pinata 12=debrief
+let solved=0;         // number of locks solved — gates forward navigation
+const ATLOC=["bed rail","chart card","IV pumps","bedside monitor","unit phone (call Respiratory)","ventilator","door"];
 let timer=null, t=CFG.minutes*60;
 const app=document.getElementById('app');
 function allLocks(){ return CFG.locks.concat([getL7()]); }
 
-function renderLockStrip(open){
+function renderLockStrip(){
   const el=document.getElementById('locks'); el.innerHTML='';
-  for(let i=0;i<7;i++){ const s=document.createElement('span'); s.className='lk'+(i<open?' open':''); s.textContent=i<open?'🔓':'🔒'; el.appendChild(s); }
+  for(let i=0;i<7;i++){ const s=document.createElement('span');
+    s.className='lk'+(i<solved?' open':''); s.textContent=i<solved?'🔓':'🔒';
+    if(i<=solved){ s.style.cursor='pointer'; s.title='Go to Lock '+(i+1); s.onclick=()=>go(4+i); }
+    el.appendChild(s); }
 }
 function norm(s){ return (s||'').trim().toUpperCase().replace(/\s+/g,''); }
 
@@ -152,7 +162,7 @@ function startClock(){ if(timer)return; timer=setInterval(()=>{ t--; if(t<0){t=0
 
 function draw(){
   const L=allLocks();
-  renderLockStrip(idx>=4 ? Math.min(idx-3,7) : 0);
+  renderLockStrip();
   if(idx===0){ // cover
     app.innerHTML=`<div class="card" style="text-align:center;padding:48px 28px">
       <p class="kick">Keck Critical Care RN Residency · SAT/SBT</p>
@@ -165,7 +175,7 @@ function draw(){
     </div>`; updateBrTog(); return;
   }
   if(idx===1){ app.innerHTML=`<div class="card"><p class="kick">How to play</p><h2>The rules</h2>
-    <p>45 minutes. Clues come in order — don’t skip ahead. When you see a tag, <b>tap it with your phone</b> (or scan the QR). Three free hints — the gold <b>?</b> on any lock. Nothing needs force.</p>
+    <p>45 minutes. Clues come in order — don’t skip ahead. When a clue points you somewhere, <b>tap the black NFC card</b> there with your phone. Three free hints — the gold <b>?</b> on any lock. Nothing needs force.</p>
     <p class="muted">Locks live on this screen. The activity lives on the tag. You’ll need both.</p>
     <button class="btn block" onclick="go(2)">Take report</button></div>`; return; }
   if(idx===2){ app.innerHTML=`<div class="card"><p class="kick">0700 — Handoff</p><h2>Meet Mr. Keller</h2>
@@ -183,14 +193,20 @@ function draw(){
       d.innerHTML=`<div class="ic">${f[0]}</div><div class="nm">${f[1]}</div>`; d.onclick=()=>openFind(i); fg.appendChild(d); });
     return; }
   if(idx>=4 && idx<=10){ // locks 1..7
-    const li=idx-4, lk=L[li];
+    const li=idx-4, lk=L[li], done=li<solved;
+    const back = idx>4
+      ? `<button class="btn ghost" style="width:auto;padding:11px 16px" onclick="go(${idx-1})">◀ Previous lock</button>`
+      : `<button class="btn ghost" style="width:auto;padding:11px 16px" onclick="go(3)">◀ Bedside</button>`;
+    const fwd = done ? `<button class="btn" style="width:auto;padding:11px 16px" onclick="go(${idx+1})">Next ▶</button>` : '';
     app.innerHTML=`<div class="card"><button class="qmark" onclick="toggleHint()">?</button>
-      <p class="kick">Lock ${li+1} — ${lk.name}</p>
+      <p class="kick">Lock ${li+1} — ${lk.name}${done?' · ✓ unlocked':''}</p>
       <p class="riddle">${lk.riddle}</p>
+      <div class="nfccard"><span class="chip">◼ NFC</span> Tap the <b>black NFC card</b> at the <b>${ATLOC[li]}</b>.</div>
       <div class="hintbox" id="hint">${lk.hint}</div>
-      <div class="lockin"><input type="text" id="code" autocomplete="off" autocapitalize="characters" placeholder="code"><button class="btn" onclick="tryCode()">Unlock</button></div>
-      <p class="muted">Enter: ${lk.fmt}</p>
-      <div class="fb" id="fb"></div></div>`;
+      <div class="lockin"><input type="text" id="code" autocomplete="off" autocapitalize="characters" placeholder="code" value="${done?lk.accept[0]:''}"><button class="btn" onclick="tryCode()">Unlock</button></div>
+      <p class="muted">Enter: ${lk.fmt}${done?' · already unlocked — use Next ▶':''}</p>
+      <div class="fb" id="fb"></div>
+      <div style="display:flex;gap:10px;margin-top:18px">${back}${fwd}</div></div>`;
     const inp=document.getElementById('code'); inp.focus();
     inp.addEventListener('keydown',e=>{ if(e.key==='Enter')tryCode(); });
     return; }
@@ -211,7 +227,7 @@ function draw(){
       <p class="muted">Time remaining: <b>${document.getElementById('clock').textContent}</b></p>
       <ul class="deb">
         <li>Which trap nearly got you — the rigors, the dex, the chronic troponin, or his gas?</li>
-        <li>Why is dexmedetomidine turned off for the SAT when it’s “light”?</li>
+        <li>Why does the propofol come off for the SAT while the fentanyl keeps running?</li>
         <li>His pH was 7.35 — why wasn’t that an SBT failure? (CO2 retainer, compensated baseline.)</li>
         <li>The family said he wasn’t ready. Whose assessment governs the call?</li>
         ${branch==='nc'?'<li>A negative cuff leak at day 5 — why does that stop a patient who passed everything else?</li>':'<li>What would a negative cuff leak have changed about today’s call?</li>'}
@@ -229,7 +245,8 @@ function openFind(i){ document.getElementById('find'+i).classList.add('seen');
 function toggleHint(){ const h=document.getElementById('hint'); h.style.display=h.style.display==='block'?'none':'block'; }
 function tryCode(){ const li=idx-4, lk=allLocks()[li], fb=document.getElementById('fb');
   const v=norm(document.getElementById('code').value);
-  if(lk.accept.map(norm).includes(v)){ fb.className='fb ok'; fb.textContent='✓ '+lk.ok;
+  if(v===''){ fb.className='fb bad'; fb.textContent='Enter a code to continue — nothing advances without one.'; return; }
+  if(lk.accept.map(norm).includes(v)){ solved=Math.max(solved, li+1); fb.className='fb ok'; fb.textContent='✓ '+lk.ok;
     setTimeout(()=>go(idx+1 <=10 ? idx+1 : 11), 1400); }
   else { fb.className='fb bad'; fb.textContent='✗ '+lk.bad; } }
 function pina(choice){ const correct = branch==='nc' ? 'RETRY' : 'EXTUBATE'; const o=document.getElementById('pfb');

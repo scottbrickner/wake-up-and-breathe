@@ -70,7 +70,7 @@
 <script>
 /* ===== Wake Up & Breathe — Keller NFC activity pages =====
    One file, hash-routed. Write these URLs to the 7 NFC tags:
-     #t1 bed rail | #t2 chart | #t3 pumps | #t4 monitor | #t5 radio | #t6 vent | #t7 door
+     #t1 bed rail | #t2 chart | #t3 pumps | #t4 monitor | #t5 phone (RT) | #t6 vent | #t7 door
    Branch (No cuff leak): point the vent + door tags at #t6b and #t7b instead of #t6/#t7.
 */
 
@@ -105,6 +105,7 @@ function t2(){
   return header('Clue — The Chart', true)+`<div class="body">
     <h1>SAT Safety Screen</h1>
     <p>Screen him as he is <b>right now</b> — history is not an exclusion. Any YES = stop.</p>
+    <a href="chart.html" target="_blank" class="btn gold" style="display:block;text-decoration:none;margin:4px 0 14px;text-align:center">📋 Open his full chart</a>
     ${rows}
     <button class="btn" onclick="checkT2()">Submit the screen</button>
     <div class="fb" id="t2fb"></div><div id="t2out"></div>
@@ -125,17 +126,17 @@ function checkT2(){
 /* --- T3 pumps: drip decision + awake check --- */
 function t3(){ return header('Clue — The Pumps')+`<div class="body" id="t3b">
   <h1>Three drips are running</h1>
-  <p><b>Dexmedetomidine</b> (RASS goal 0) · <b>Fentanyl</b> (CPOT &lt;3) · <b>Heparin</b> (DVT). Run the awakening trial — what do you silence?</p>
-  <button class="btn ghost" onclick="t3a(0)">Stop dex &amp; fentanyl — clean slate</button>
-  <button class="btn ghost" onclick="t3a(1)">Stop dex only — keep fentanyl &amp; heparin</button>
-  <button class="btn ghost" onclick="t3a(2)">Leave dex — it's light anyway</button>
+  <p><b>Propofol</b> (RASS goal −1) · <b>Fentanyl</b> (CPOT &lt;3) · <b>Heparin</b> (DVT). Run the awakening trial — what do you silence?</p>
+  <button class="btn ghost" onclick="t3a(0)">Stop propofol &amp; fentanyl — clean slate</button>
+  <button class="btn ghost" onclick="t3a(1)">Stop propofol only — keep fentanyl &amp; heparin</button>
+  <button class="btn ghost" onclick="t3a(2)">Halve the propofol — gentler</button>
   <button class="btn ghost" onclick="t3a(3)">Stop the heparin too, to be safe</button>
   <div id="t3out"></div></div>`+foot(); }
 function t3a(x){
   const out=document.getElementById('t3out');
-  if(x===1){ out.innerHTML='<div class="fb"><span class="ok">✓ Dex off (it IS a sedative). Fentanyl continues for pain. Heparin is untouched — it never belonged in this decision.</span></div>'+t3awake(); }
+  if(x===1){ out.innerHTML='<div class="fb"><span class="ok">✓ Propofol off — the sedative stops for the SAT. Fentanyl continues for pain. Heparin is untouched — it never belonged in this decision.</span></div>'+t3awake(); }
   else if(x===0) out.innerHTML='<div class="dead"><h2>His pain just spiked</h2>CPOT 6, grimacing. You turned off his analgesia, not just sedation. Fentanyl continues at the lowest effective dose. Go back.</div>';
-  else if(x===2) out.innerHTML='<div class="dead"><h2>Dexmedetomidine is a sedative</h2>"Light" doesn\'t mean "leave it." Every sedative comes OFF for an awakening trial. Go back.</div>';
+  else if(x===2) out.innerHTML='<div class="dead"><h2>Half-dose is the failure response</h2>Halving the propofol is what you do AFTER a failed trial, not instead of one. An awakening trial means the sedative is OFF. Go back.</div>';
   else out.innerHTML='<div class="dead"><h2>That\'s his DVT treatment</h2>Heparin has nothing to do with the SAT. Don\'t stop a therapeutic anticoagulant to run an awakening trial. Go back.</div>';
 }
 function t3awake(){
@@ -148,7 +149,7 @@ function t3awake(){
 }
 function t3b(x){
   const o=document.getElementById('t3out2');
-  if(x===1){ o.innerHTML='<div class="npc"><span class="who">You</span>"Raymond — squeeze my hand. Show me two fingers."</div><div class="npc"><span class="who">Mr. Keller</span>…a breath, then he squeezes, and two fingers.</div><div class="fb"><span class="ok">✓ Awake = follows a command.</span></div>'+codeBlock('COMMAND','Eyes open was never the bar.'); }
+  if(x===1){ o.innerHTML='<div class="npc"><span class="who">You</span>"Raymond — squeeze my hand, show me two fingers, and lift your head off the pillow."</div><div class="npc"><span class="who">Mr. Keller</span>…a breath, then he squeezes, two fingers come up, and he lifts his head off the pillow and holds it.</div><div class="fb"><span class="ok">✓ Follows commands AND protects his airway — that head-lift shows strength to clear secretions.</span></div>'+codeBlock('COMMAND','Eyes open was never the bar — following commands + airway protection is.'); }
   else o.innerHTML='<div class="dead"><h2>Not yet</h2>Eyes open isn\'t awake. Per protocol, awake means he follows a simple command or tracks purposefully. A patient who isn\'t awake can\'t pass the SAT.</div>';
 }
 
@@ -173,11 +174,11 @@ function t4a(x){
   else o.innerHTML='<div class="dead"><h2>You re-sedated a ready patient</h2>Which limit did he actually cross — and for how long? SpO2 needs &lt;88 for ≥5 min (he never hit 88). RR fails over 35. RASS over 2. He crossed none.</div>';
 }
 
-/* --- T5 radio: SBT safety screen; facilitator voices RCP (code 830) --- */
-function t5(){ return header('Clue — The Radio')+`<div class="body">
+/* --- T5 phone: SBT safety screen; facilitator voices RCP (code 830) --- */
+function t5(){ return header('Clue — The Phone')+`<div class="body">
   <h1>Call Respiratory</h1>
-  <p>The SAT was yours. The vent is not. Key the walkie, report everything, and screen the SBT side together.</p>
-  <div class="npc"><span class="who">RCP (on the walkie)</span>"Report your SAT result and his FiO2 and PEEP right now — not overnight. …Forty and a five, that clears me. He's a CO2 retainer and day five, so I'm going pressure support EIGHT, not five. Thirty minutes minimum."</div>
+  <p>The SAT was yours. The vent is not. Pick up the unit phone, call Respiratory, report everything, and screen the SBT side together.</p>
+  <div class="npc"><span class="who">RCP (on the phone)</span>"Report your SAT result and his FiO2 and PEEP right now — not overnight. …Forty and a five, that clears me. He's a CO2 retainer and day five, so I'm going pressure support EIGHT, not five. Thirty minutes minimum."</div>
   <h2>SBT safety screen — all clear?</h2>
   <div class="chartrow"><b>FiO2 40%</b> ≤ 50 ✓ · <b>PEEP 5</b> &lt; 8 ✓ · SpO2 91 (target 88–92) ✓</div>
   <div class="chartrow">RASS 0 ✓ · SAT passed ✓ · no MI in 24h ✓ · not chronically vent-dependent ✓</div>
@@ -205,15 +206,31 @@ function t6(branch){
       <div><div class="l">Vt</div><div class="v">400</div><div class="s">mL</div></div>
     </div>
     ${cuff}
-    <h2>Rapid Shallow Breathing Index</h2>
-    <p>RSBI = breaths per minute ÷ tidal volume in <b>LITERS</b>. Threshold &lt; 105.</p>
-    <div class="code">
-      <div class="lab">Your RSBI</div><div class="val" style="font-size:34px">26 ÷ 0.40 = 65</div>
-      <div class="hint" style="margin-top:10px">Lock 6 is a <b>three-digit</b> keypad, but your answer is only two digits — add a <b>leading zero</b>:</div>
-      <div class="val" style="margin-top:6px">0 6 5</div>
+    <h2>RSBI calculator</h2>
+    <p>RSBI = respiratory rate ÷ tidal volume <b>in liters</b>. Read the vent above, enter the numbers, compute. Threshold &lt; 105.</p>
+    <div class="q">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <label style="flex:1;min-width:120px;font-size:14px;color:#cdd7e3">Rate (breaths/min)<br>
+          <input type="number" id="rsbiRR" inputmode="numeric" style="width:100%;font-size:20px;padding:11px;border-radius:10px;border:1px solid var(--line);background:#0e1620;color:#fff;margin-top:4px"></label>
+        <label style="flex:1;min-width:120px;font-size:14px;color:#cdd7e3">Tidal volume (mL)<br>
+          <input type="number" id="rsbiVt" inputmode="numeric" style="width:100%;font-size:20px;padding:11px;border-radius:10px;border:1px solid var(--line);background:#0e1620;color:#fff;margin-top:4px"></label>
+      </div>
+      <button class="btn" style="margin-top:12px" onclick="calcRSBI()">Compute RSBI</button>
+      <div id="rsbiOut" style="margin-top:10px"></div>
     </div>
-    ${branch?'<div class="dead"><h2>But the leak is negative</h2>RSBI is fine — but a negative cuff leak at day 5 means airway-edema risk. The number isn\'t the whole story. Take 065 to Lock 6, then head to the door.</div>':''}
+    ${branch?'<div class="dead"><h2>But the leak is negative</h2>RSBI is fine — but a negative cuff leak at day 5 means airway-edema risk. The number isn\'t the whole story. Take your code to Lock 6, then head to the door.</div>':''}
   </div>`+foot();
+}
+function calcRSBI(){
+  const rr=parseFloat(document.getElementById('rsbiRR').value);
+  const vt=parseFloat(document.getElementById('rsbiVt').value);
+  const o=document.getElementById('rsbiOut');
+  if(!rr||!vt){ o.innerHTML='<div class="fb"><span class="bad">Enter both the rate and the tidal volume.</span></div>'; return; }
+  const L=vt/1000, rsbi=Math.round(rr/L), code=String(rsbi).padStart(3,'0');
+  o.innerHTML='<div class="code"><div class="lab">RSBI</div>'
+    +'<div class="val" style="font-size:30px">'+rr+' ÷ '+L.toFixed(2)+' L = '+rsbi+'</div>'
+    +'<div class="hint" style="margin-top:8px">'+(rsbi<105?'Under 105 — passes. ':'105 or over — fails. ')+'Lock 6 is three digits:</div>'
+    +'<div class="val" style="margin-top:4px">'+code.split('').join(' ')+'</div></div>';
 }
 
 /* --- T7 door: readiness to extubate --- */

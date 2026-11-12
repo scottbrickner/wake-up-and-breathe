@@ -15,7 +15,7 @@
   .modebtn{flex:1;min-width:150px;border:1px solid var(--line);background:var(--slate2);color:#eef3f9;border-radius:14px;padding:18px;font-size:17px;font-weight:800;cursor:pointer;text-align:center}
   .modebtn .d{font-size:13px;font-weight:500;color:var(--muted);margin-top:4px}
   .modebtn.on{outline:3px solid var(--gold)}
-  .modebtn.baseline.on{background:#123a28}.modebtn.sbt.on{background:#12324a}.modebtn.pain.on{background:#3a1414}
+  .modebtn.baseline.on{background:#123a28}.modebtn.sat.on{background:#3a2f12}.modebtn.sbt.on{background:#12324a}.modebtn.pain.on{background:#3a1414}
   .open{display:block;border:1px solid var(--line);background:var(--slate2);color:#eef3f9;border-radius:12px;padding:15px 18px;font-size:16px;font-weight:700;text-decoration:none;margin:8px 0}
   .open:hover{border-color:var(--gold)} .open .s{font-weight:500;color:var(--muted);font-size:13px}
   .open.big{background:var(--cardinal);border-color:#7a0000}
@@ -36,22 +36,24 @@
   <h2>Room state <span class="cur" id="cur">BASELINE</span></h2>
   <div class="row">
     <button class="modebtn baseline on" id="mb-baseline" onclick="setMode('baseline')">BASELINE<div class="d">Full support · vent VC · HR 88 / RR 18</div></button>
+    <button class="modebtn sat" id="mb-sat" onclick="setMode('sat')">SAT<div class="d">Sedation off · awakening · HR 96 / RR 32 / SpO2 89</div></button>
     <button class="modebtn sbt" id="mb-sbt" onclick="setMode('sbt')">SBT<div class="d">Pressure support 8 · HR 94 / RR 26</div></button>
     <button class="modebtn pain" id="mb-pain" onclick="setMode('pain')">PAIN<div class="d">Analgesia stopped · HR 110 · CPOT 6</div></button>
   </div>
-  <p class="note">Shortcut keys work on any device screen too: <code>B</code> vented · <code>S</code> SBT · <code>P</code> pain. The pump broadcasts PAIN automatically if a team stops fentanyl.</p>
+  <p class="note">Shortcut keys work on any device screen too: <code>B</code> vented · <code>A</code> SAT · <code>S</code> SBT · <code>P</code> pain. The pump broadcasts PAIN automatically if a team stops fentanyl.</p>
 
   <h2>Device screens (open each on its display, then F11)</h2>
   <a class="open" href="monitor.html" target="_blank">🫀 Bedside Monitor</a>
   <a class="open" href="vent.html" target="_blank">🫁 Ventilator</a>
   <a class="open" href="pump.html" target="_blank">💉 Infusion Pump (interactive)</a>
   <a class="open" href="tags.html#t1" target="_blank">🔖 NFC Activities <span class="s">— preview the tag pages (#t1…#t7)</span></a>
+  <a class="open" href="chart.html" target="_blank">📋 Patient Chart <span class="s">— pull up on a computer/tablet (branch: chart.html?b=nc)</span></a>
 
   <h2>NFC tag URLs</h2>
   <p class="note">Write these to the chips (this page's address, swap the end). Only the vent + door chips change for the branch.</p>
   <div class="tags">
     <code>tags.html#t1</code> bed rail · <code>#t2</code> chart · <code>#t3</code> pumps · <code>#t4</code> monitor<br>
-    <code>#t5</code> radio · <code>#t6</code> vent (branch <code>#t6b</code>) · <code>#t7</code> door (branch <code>#t7b</code>)
+    <code>#t5</code> phone (RT) · <code>#t6</code> vent (branch <code>#t6b</code>) · <code>#t7</code> door (branch <code>#t7b</code>)
   </div>
 
   <h2>Reset between teams</h2>
@@ -59,13 +61,14 @@
 </div>
 <script>
 let bc; try{ bc=new BroadcastChannel('wub'); }catch(e){}
-function setMode(m){ ['baseline','sbt','pain'].forEach(x=>document.getElementById('mb-'+x).classList.toggle('on',x===m));
+const MODES=['baseline','sat','sbt','pain'];
+function setMode(m){ MODES.forEach(x=>document.getElementById('mb-'+x).classList.toggle('on',x===m));
   document.getElementById('cur').textContent=m.toUpperCase(); if(bc) bc.postMessage({mode:m}); }
 if(bc) bc.onmessage=(e)=>{ if(e.data&&e.data.mode){ const m=e.data.mode;
-  ['baseline','sbt','pain'].forEach(x=>document.getElementById('mb-'+x).classList.toggle('on',x===m));
+  MODES.forEach(x=>document.getElementById('mb-'+x).classList.toggle('on',x===m));
   document.getElementById('cur').textContent=m.toUpperCase(); } };
 window.addEventListener('keydown',e=>{ const k=e.key.toLowerCase();
-  if(k==='b')setMode('baseline'); if(k==='s')setMode('sbt'); if(k==='p')setMode('pain'); });
+  if(k==='b')setMode('baseline'); if(k==='a')setMode('sat'); if(k==='s')setMode('sbt'); if(k==='p')setMode('pain'); });
 </script>
 </body>
 </html>

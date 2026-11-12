@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KELLER, R — ICU Chart</title>
+<style>
+  :root{--ink:#1a1a1a;--grey:#555;--line:#c7ccd1;--shade:#eef1f3;--head:#d9dde1}
+  *{box-sizing:border-box}
+  body{margin:0;background:#9aa3ab;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif;font-size:15px;line-height:1.5}
+  .page{max-width:900px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 30px rgba(0,0,0,.3)}
+  .masthead{background:var(--head);border-bottom:2px solid #b7bdc2;padding:12px 20px}
+  .masthead .t{font-weight:800;letter-spacing:.5px;font-size:15px}
+  .masthead .id{font-family:"Courier New",monospace;font-size:13px;color:#333;margin-top:3px}
+  .masthead .conf{float:right;font-size:11px;color:#b11818;font-weight:800;letter-spacing:1px}
+  .wrap{padding:18px 20px 60px}
+  .banner{text-align:center;font-weight:800;letter-spacing:1px;margin:6px 0 16px;font-size:17px}
+  h2{background:var(--shade);border:1px solid var(--line);font-size:13px;letter-spacing:.5px;text-transform:uppercase;
+    padding:6px 10px;margin:22px 0 6px;font-weight:800}
+  table{width:100%;border-collapse:collapse;font-family:"Courier New",monospace;font-size:13px;margin:4px 0}
+  th,td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+  th{background:var(--head);font-weight:800}
+  tr:nth-child(even) td{background:#f7f8f9}
+  .kv td:first-child{font-weight:800;width:150px;background:#f1f3f5}
+  .note{margin:8px 0;font-family:"Courier New",monospace;font-size:13px}
+  .note b{display:block;margin-bottom:2px}
+  .hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+  .small{color:var(--grey);font-size:12px;font-style:italic;margin-top:4px}
+  .branchtag{display:inline-block;background:#fff4e0;border:1px solid #E8A33D;color:#7a5410;border-radius:6px;
+    padding:3px 10px;font-size:12px;font-weight:700;margin-left:8px}
+  .foot{text-align:center;color:var(--grey);font-size:11px;padding:16px;border-top:1px solid var(--line)}
+  @media print{body{background:#fff}.page{box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="masthead">
+    <span class="conf">CONFIDENTIAL · SIMULATION USE ONLY</span>
+    <div class="t">KECK MEDICINE OF USC — CRITICAL CARE — PATIENT RECORD</div>
+    <div class="id">KELLER, RAYMOND · MRN 713-55-02 · DOB 09/22/1968 (58M) · ICU BED 2 · ATTENDING: OKAFOR MD · PRINTED TODAY 0705</div>
+  </div>
+  <div class="wrap">
+    <div class="banner">ICU CHART <span id="btag"></span></div>
+
+    <h2>Patient / Encounter</h2>
+    <table class="kv">
+      <tr><td>Name</td><td>KELLER, Raymond</td></tr>
+      <tr><td>Age / Sex</td><td>58 / Male · Full code</td></tr>
+      <tr><td>Admitted</td><td>5 days ago via ED · ICU day 5</td></tr>
+      <tr><td>Dx</td><td>COPD exacerbation + CAP; hypercapnic respiratory failure; intubated ED</td></tr>
+      <tr><td>Allergies</td><td>Sulfa (rash) · Wt/Ht 82 kg / 175 cm</td></tr>
+    </table>
+
+    <h2>History (per admission H&amp;P)</h2>
+    <div class="note">PMH: COPD (home 2 L NC O2, GOLD III) · CKD stage 3 (baseline Cr 1.6) · HTN · remote DVT.<br>
+    Home meds resumed: tiotropium, albuterol/ipratropium nebs, lisinopril. NO home anti-epileptics.<br>
+    Social: Former 40-pack-year smoker, quit 2 yrs. Rare alcohol, no withdrawal history.</div>
+
+    <h2>Hospital course — by day</h2>
+    <table>
+      <tr><th>Day</th><th>Events</th></tr>
+      <tr><td>1</td><td>Intubated ED for hypercapnic failure. Febrile 39.1 °C with VISIBLE SHAKING on arrival — rigors/chills, NOT witnessed seizure. Started propofol + fentanyl.</td></tr>
+      <tr><td>2</td><td>EEG for the shaking episode: NO epileptiform activity — consistent with rigors. No AEDs. Heparin infusion begun for chronic DVT management.</td></tr>
+      <tr><td>3</td><td>Afebrile. Troponin 0.06 — chronic elevation with CKD, flat trend, no ECG changes.</td></tr>
+      <tr><td>4</td><td>Sputum improving. FiO2 weaned toward 40%. Sedation lightened toward RASS goal −1.</td></tr>
+      <tr><td>5 (today)</td><td>Off fever 48 h. Awaiting SAT-SBT. RT documented cuff-leak check this AM.</td></tr>
+    </table>
+
+    <h2>Active &amp; recent orders (most recent at bottom)</h2>
+    <table>
+      <tr><th>Time</th><th>Order</th><th>Status</th></tr>
+      <tr><td>Day2 0900</td><td>Heparin infusion per DVT protocol, goal PTT 60-80</td><td>ACTIVE</td></tr>
+      <tr><td>Day4 2000</td><td>Propofol infusion, titrate to RASS goal −1</td><td>ACTIVE</td></tr>
+      <tr><td>Day4 2000</td><td>Fentanyl infusion, titrate to CPOT &lt; 3</td><td>ACTIVE</td></tr>
+      <tr><td>Today 0430</td><td>Wean FiO2 as tolerated, maintain SpO2 88-92% (COPD target)</td><td>ACTIVE</td></tr>
+      <tr><td>Today 0600</td><td>SAT-SBT per protocol CP 3-162 this AM; RN/RCP to coordinate</td><td>ACTIVE</td></tr>
+      <tr><td>Today 0700</td><td>Cuff leak test prior to extubation consideration — RCP</td><td>ACTIVE</td></tr>
+    </table>
+    <div class="small">Heparin is for chronic DVT — not part of the SAT-SBT decision. Review every line for relevance.</div>
+
+    <h2>Progress notes (most recent first)</h2>
+    <div class="note"><b>CRITICAL CARE — Okafor, L. MD — Today 0640</b>
+      58M vent day 5, COPD + CAP, improving. Afebrile 48 h, off pressors throughout. On propofol (a sedative — OFF for the SAT) + fentanyl. RASS goal −1. Chronic troponin from CKD, flat — no acute cardiac issue. Day-1 shaking was rigors (EEG negative), not seizure — no seizure precautions, no AEDs. Plan: SAT-SBT this AM. He is a CO2 retainer; expect a compensated gas at baseline, do not over-read. Cuff leak matters at day 5.</div>
+    <hr class="hr">
+    <div class="note"><b>NEUROLOGY — Set, A. MD — Day 2 1500</b>
+      Consulted for the admission shaking episode. EEG: no epileptiform discharges. Clinically consistent with rigors/chills from fever. No evidence of seizure. No anti-epileptic therapy indicated. Sign off.</div>
+    <hr class="hr">
+    <div class="note" id="rtnote"></div>
+    <hr class="hr">
+    <div class="note"><b>ED INTUBATION NOTE — Vance, R. MD — Day 1</b>
+      RSI for hypercapnic respiratory failure. Cormack-Lehane Grade II, intubated second attempt with bougie. 8.0 ETT at 23 cm. No prior difficult airway documented.</div>
+
+    <h2>Laboratory — CBC &amp; BMP (today 0400)</h2>
+    <table>
+      <tr><th>Test</th><th>Result</th><th>Ref</th><th>Flag</th></tr>
+      <tr><td>WBC</td><td>9.4</td><td>4.0-11.0 K/uL</td><td></td></tr>
+      <tr><td>Hgb</td><td>11.1</td><td>13.5-17.5 g/dL</td><td>L</td></tr>
+      <tr><td>CO2 (bicarb)</td><td>30</td><td>22-29 mmol/L</td><td>H</td></tr>
+      <tr><td>BUN</td><td>28</td><td>7-20 mg/dL</td><td>H</td></tr>
+      <tr><td>Creatinine</td><td>1.6</td><td>0.6-1.3 mg/dL</td><td>H — CKD baseline</td></tr>
+    </table>
+
+    <h2>Cardiac — Troponin-I</h2>
+    <table>
+      <tr><th>Drawn</th><th>Result</th><th>Ref</th><th>Note</th></tr>
+      <tr><td>Day 1 2000</td><td>0.07</td><td>&lt; 0.04 ng/mL</td><td>Chronic (CKD)</td></tr>
+      <tr><td>Day 3 0600</td><td>0.06</td><td>&lt; 0.04 ng/mL</td><td>Flat — no acute change</td></tr>
+    </table>
+    <div class="small">Chronic troponin elevation with CKD, flat, no ECG changes — NOT ischemia in the past 24 h.</div>
+
+    <h2>Arterial blood gas — serial (CO2 retainer)</h2>
+    <table>
+      <tr><th>Time</th><th>pH</th><th>PaCO2</th><th>PaO2</th><th>HCO3</th><th>FiO2</th><th>SpO2</th></tr>
+      <tr><td>Day1 2100</td><td>7.24</td><td>72</td><td>66</td><td>29</td><td>50%</td><td>89%</td></tr>
+      <tr><td>Day3 0600</td><td>7.33</td><td>60</td><td>74</td><td>30</td><td>40%</td><td>91%</td></tr>
+      <tr><td>Today 0500</td><td>7.35</td><td>56</td><td>78</td><td>30</td><td>40%</td><td>91%</td></tr>
+    </table>
+    <div class="small">Today's gas (pH 7.35 / pCO2 56 / HCO3 30) is his COMPENSATED CHRONIC BASELINE — not an acute failure. SpO2 target 88-92%.</div>
+
+    <h2>Ventilator flowsheet</h2>
+    <table>
+      <tr><th>Time</th><th>Mode</th><th>Set RR</th><th>Vt / PS</th><th>FiO2</th><th>PEEP</th><th>Meas RR / SpO2</th></tr>
+      <tr><td>0430</td><td>Vol Control</td><td>16</td><td>Vt 450</td><td>40%</td><td>5</td><td>18 / 91%</td></tr>
+      <tr><td>SBT today</td><td>Press Support</td><td>—</td><td>PS 8</td><td>40%</td><td>5</td><td>26 / spont Vt 400</td></tr>
+    </table>
+
+    <h2>Microbiology</h2>
+    <table>
+      <tr><th>Specimen</th><th>Collected</th><th>Result</th></tr>
+      <tr><td>Blood culture x2</td><td>Day 1</td><td>NO GROWTH at 48 h (final)</td></tr>
+      <tr><td>Sputum culture</td><td>Day 1</td><td>H. influenzae, sensitive to ceftriaxone</td></tr>
+      <tr><td>Resp viral panel</td><td>Day 1</td><td>Negative</td></tr>
+    </table>
+  </div>
+  <div class="foot">CONFIDENTIAL — FOR SIMULATION USE ONLY · KELLER, R · MRN 713-55-02</div>
+</div>
+<script>
+  var nc = new URLSearchParams(location.search).get('b')==='nc';
+  document.getElementById('btag').innerHTML = nc
+    ? '<span class="branchtag">NO-CUFF-LEAK RUN</span>' : '';
+  document.getElementById('rtnote').innerHTML =
+    '<b>RESPIRATORY THERAPY — Brooks, D. RRT — Today 0545</b>' +
+    (nc
+      ? 'Cuff leak test performed: minimal/no audible leak, measured leak volume 60 mL — NEGATIVE. Flagged to team; airway-edema risk at day 5. Current settings: Pressure Support trial pending. FiO2 40%, PEEP 5. Will assist with SBT when RN completes SAT.'
+      : 'Cuff leak test performed: audible leak, measured leak volume 185 mL — POSITIVE. Current settings: Pressure Support trial pending. FiO2 40%, PEEP 5. Will assist with SBT when RN completes SAT.');
+</script>
+</body>
+</html>

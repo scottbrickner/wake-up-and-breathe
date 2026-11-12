@@ -50,7 +50,7 @@
   </div>
   <div class="bottombar" id="bottombar"></div>
 </div>
-<div class="hintkey">B = vented (full support) · S = SBT (pressure support) · F11 = fullscreen · syncs all screens</div>
+<div class="hintkey">B = vented · A = SAT (awakening) · S = SBT (pressure support) · F11 = fullscreen · syncs all screens</div>
 
 <script>
 /* ===== Mr. Keller ventilator display — ambient prop. States: VC (start) / SBT (pressure support).
@@ -60,6 +60,12 @@ const STATES = {
     mode:"VOLUME CONTROL", rr:16, jitter:0.03, inspFrac:0.33, spont:false,
     nums:[["Ppeak","22","cmH₂O","yel"],["Pmean","8","cmH₂O","yel"],["PEEP","5","cmH₂O","yel"],
           ["RR","18","/min","grn"],["VTe","450","mL","cyn"],["MVe","8.1","L/min","cyn"]],
+    dials:[["O₂","40","%"],["Set RR","16","/min"],["VT","450","mL"],["PEEP","5","cmH₂O"],["I:E","1:2",""]]
+  },
+  sat: {
+    mode:"VOLUME CONTROL · SPONT", rr:30, jitter:0.10, inspFrac:0.33, spont:false,
+    nums:[["Ppeak","24","cmH₂O","yel"],["Pmean","8","cmH₂O","yel"],["PEEP","5","cmH₂O","yel"],
+          ["RR","30","/min","grn"],["VTe","450","mL","cyn"],["MVe","11.0","L/min","cyn"]],
     dials:[["O₂","40","%"],["Set RR","16","/min"],["VT","450","mL"],["PEEP","5","cmH₂O"],["I:E","1:2",""]]
   },
   sbt: {
@@ -160,12 +166,14 @@ let bc; try{ bc=new BroadcastChannel('wub'); }catch(e){}
 function setMode(m, broadcast){
   // B/baseline -> volume control ; S/sbt -> pressure support ; pain leaves the vent as-is
   if(m==='sbt' && cur!=='sbt'){ cur='sbt'; location.hash='sbt'; reset(); }
+  else if(m==='sat' && cur!=='sat'){ cur='sat'; location.hash='sat'; reset(); }
   else if(m==='baseline' && cur!=='vc'){ cur='vc'; location.hash='vc'; reset(); }
   if(broadcast && bc) bc.postMessage({mode:m});
 }
 if(bc) bc.onmessage=(e)=>{ if(e.data&&e.data.mode) setMode(e.data.mode,false); };
 window.addEventListener('keydown', e=>{ const k=e.key.toLowerCase();
   if(k==='b'||k==='v'){ setMode('baseline',true); }   // B = vented (full support)
+  if(k==='a'){ setMode('sat',true); }                 // A = SAT (awakening, spontaneous over set rate)
   if(k==='s'){ setMode('sbt',true); }                 // S = SBT (pressure support)
   if(k==='p'){ setMode('pain',true); }                // P = pain: syncs monitor, vent unchanged
 });
