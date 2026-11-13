@@ -177,25 +177,60 @@ function t4a(x){
 }
 
 /* --- T5 phone: SBT safety screen; facilitator voices RCP (code 830) --- */
+const NUMIN='width:100%;font-size:20px;padding:11px;border-radius:10px;border:1px solid var(--line);background:#0e1620;color:#fff;margin-top:4px';
 function t5(){ return header('Clue — The Phone')+`<div class="body">
   <h1>Call Respiratory</h1>
-  <p>The SAT was yours. The vent is not. Pick up the unit phone and call Respiratory — it's a back-and-forth. Work the call in order:</p>
-  <div class="q"><p><b>① Dial RT.</b> They'll ask you for a report.</p>${audBtn('audio/kel_03a_rt_demand.mp3','RT answers')}</div>
-  <div class="q"><p><b>② Give your report:</b> "He passed the SAT · fentanyl's running for pain · FiO2 40% · PEEP 5 — right now."</p>
-    <p class="muted">Then screen the SBT side together:</p>
-    <div class="chartrow"><b>FiO2 40%</b> ≤ 50 ✓ · <b>PEEP 5</b> &lt; 8 ✓ · SpO2 91 (target 88–92) ✓</div>
-    <div class="chartrow">RASS 0 ✓ · SAT passed ✓ · no MI in 24h ✓ · not chronically vent-dependent ✓</div>
-    ${audBtn('audio/kel_03b_rt_clearance.mp3','RT gives clearance')}</div>
-  <h2>Build your clearance code</h2>
-  <p>He gave you two numbers. Run them together — the <b>support level</b> first, then the <b>minutes</b>.</p>
-  <div class="code">
-    <div class="lab">Pressure support</div><div class="val" style="font-size:34px">8</div>
-    <div class="lab" style="margin-top:8px">for how many minutes?</div><div class="val" style="font-size:34px">30</div>
-    <div class="hint" style="margin-top:10px">Run them together → one 3-digit code for Lock 5.</div>
-    <div class="val" style="margin-top:8px">8 3 0</div>
+  <p>The SAT was yours. The vent is not. Pick up the unit phone and call Respiratory — it's a back-and-forth. It unfolds as you go.</p>
+
+  <div class="q"><p><b>① Dial RT.</b> They'll ask you for a report — listen for what they want.</p>
+    <button class="btn gold" style="width:auto;padding:11px 18px" onclick="playClip('audio/kel_03a_rt_demand.mp3');t5show('t5s2')">▶ RT answers</button></div>
+
+  <div class="q" id="t5s2" style="display:none">
+    <p><b>② Report his numbers — RIGHT NOW, not overnight.</b> Read the vent and give RT what they asked for:</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <label style="flex:1;min-width:110px;font-size:14px;color:#cdd7e3">FiO2 (%)<br><input type="number" id="t5fio2" inputmode="numeric" style="${NUMIN}"></label>
+      <label style="flex:1;min-width:110px;font-size:14px;color:#cdd7e3">PEEP (cmH₂O)<br><input type="number" id="t5peep" inputmode="numeric" style="${NUMIN}"></label>
+    </div>
+    <button class="btn" style="margin-top:12px" onclick="t5report()">Report to RT</button>
+    <div id="t5rfb" style="margin-top:8px;font-weight:700"></div>
   </div>
+
+  <div class="q" id="t5s3" style="display:none">
+    <p><b>③ RT screens the SBT side with you — all clear:</b></p>
+    <div class="chartrow">FiO2 40% ≤ 50 ✓ · PEEP 5 &lt; 8 ✓ · SpO2 91 (target 88–92) ✓</div>
+    <div class="chartrow">RASS 0 ✓ · SAT passed ✓ · no MI in 24h ✓ · not chronically vent-dependent ✓</div>
+    <p style="margin-top:8px">Now listen for the clearance — the <b>support level</b> and the <b>minutes</b>:</p>
+    <button class="btn gold" style="width:auto;padding:11px 18px" onclick="playClip('audio/kel_03b_rt_clearance.mp3');t5show('t5s4')">▶ RT gives clearance</button></div>
+
+  <div class="q" id="t5s4" style="display:none">
+    <p><b>④ Enter the clearance you just heard:</b></p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <label style="flex:1;min-width:110px;font-size:14px;color:#cdd7e3">Pressure support (cmH₂O)<br><input type="number" id="t5ps" inputmode="numeric" style="${NUMIN}"></label>
+      <label style="flex:1;min-width:110px;font-size:14px;color:#cdd7e3">Minutes (minimum)<br><input type="number" id="t5min" inputmode="numeric" style="${NUMIN}"></label>
+    </div>
+    <button class="btn" style="margin-top:12px" onclick="t5clear()">Confirm clearance</button>
+    <div id="t5cfb" style="margin-top:8px;font-weight:700"></div>
+    <div id="t5code" style="display:none;margin-top:10px"></div>
+  </div>
+
   <p class="muted">Note: his gas today (pH 7.35 / pCO2 56) is his compensated COPD baseline — not a reason to stop.</p>
   </div>`+foot(); }
+function t5show(id){ document.getElementById(id).style.display='block'; }
+function t5report(){
+  const f=parseFloat(document.getElementById('t5fio2').value), p=parseFloat(document.getElementById('t5peep').value), o=document.getElementById('t5rfb');
+  if(f===60){ o.style.color='#ff9d9d'; o.textContent='✗ That\'s the overnight FiO2 — RT wants it RIGHT NOW. Check the current vent.'; return; }
+  if(f!==40){ o.style.color='#ff9d9d'; o.textContent='✗ Check his current FiO2 on the vent.'; return; }
+  if(p!==5){ o.style.color='#ff9d9d'; o.textContent='✗ Check his current PEEP on the vent.'; return; }
+  o.style.color='#6fd99f'; o.textContent='✓ Forty and a five — reported. RT clears his side.'; t5show('t5s3');
+}
+function t5clear(){
+  const ps=parseFloat(document.getElementById('t5ps').value), m=parseFloat(document.getElementById('t5min').value), o=document.getElementById('t5cfb');
+  if(ps!==8){ o.style.color='#ff9d9d'; o.textContent='✗ Listen again — what pressure support did RT set? He\'s COPD/day 5, not the usual five.'; return; }
+  if(m!==30){ o.style.color='#ff9d9d'; o.textContent='✗ Listen again — how many minutes minimum?'; return; }
+  o.style.color='#6fd99f'; o.textContent='✓ Pressure support eight, thirty minutes.';
+  const cb=document.getElementById('t5code'); cb.style.display='block';
+  cb.innerHTML=codeBlock('8 3 0','Run them together — enter in Lock 5.');
+}
 
 /* --- T6 vent: RSBI + cuff leak (clean) --- */
 function t6(branch){
