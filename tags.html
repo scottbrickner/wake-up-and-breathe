@@ -276,6 +276,26 @@ function render(){
 }
 window.addEventListener('hashchange', render);
 render();
+
+/* ---- preview navigation: ONLY shows when ?preview=1 is in the URL; never on the real chips ---- */
+(function(){
+  if(new URLSearchParams(location.search).get('preview')!=='1') return;
+  const seq=['t1','t2','t3','t4','t5','t6','t7','t6b','t7b'];
+  const labels={t1:'T1 bed rail',t2:'T2 chart',t3:'T3 pumps',t4:'T4 monitor',t5:'T5 phone',t6:'T6 vent',t7:'T7 door',t6b:'T6 vent (branch)',t7b:'T7 door (branch)'};
+  const bar=document.createElement('div');
+  bar.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:999;display:flex;align-items:center;gap:8px;'
+    +'padding:10px 14px;background:#0a0f16;border-top:1px solid #FFC72C;color:#FFC72C;font-weight:800;font-size:15px';
+  bar.innerHTML='<button id="pvp" style="background:#1f2c3d;color:#fff;border:1px solid #334;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer">◀ Prev</button>'
+    +'<span id="pvl" style="flex:1;text-align:center">preview</span>'
+    +'<button id="pvn" style="background:#990000;color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer">Next ▶</button>';
+  document.body.appendChild(bar);
+  document.body.style.paddingBottom='60px';
+  function idxNow(){ const h=(location.hash||'#t1').slice(1).toLowerCase(); const i=seq.indexOf(h); return i<0?0:i; }
+  function upd(){ document.getElementById('pvl').textContent=labels[seq[idxNow()]]+'  ('+(idxNow()+1)+'/'+seq.length+')'; }
+  document.getElementById('pvp').onclick=()=>{ location.hash=seq[(idxNow()+seq.length-1)%seq.length]; };
+  document.getElementById('pvn').onclick=()=>{ location.hash=seq[(idxNow()+1)%seq.length]; };
+  window.addEventListener('hashchange', upd); upd();
+})();
 </script>
 </body>
 </html>
