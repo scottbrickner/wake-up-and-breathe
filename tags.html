@@ -78,6 +78,8 @@ function el(tag, cls, html){ const e=document.createElement(tag); if(cls)e.class
 function header(text, chart){ return `<div class="hdr${chart?' chart':''}"><span class="wave">${chart?'🩺':'🔒'}</span>${text}</div>`; }
 function foot(text){ return `<div class="foot">${text||'Type the code into the room screen.'}</div>`; }
 function codeBlock(val, hint){ return `<div class="code"><div class="lab">Your code</div><div class="val">${val}</div><div class="hint">${hint||''}</div></div>`; }
+let _au; function playClip(src){ if(!_au)_au=new Audio(); _au.src=src; _au.play().catch(()=>{}); }
+function audBtn(src,label){ return `<button class="btn gold" style="width:auto;padding:11px 18px;margin:6px 0" onclick="playClip('${src}')">▶ ${label}</button>`; }
 
 /* --- T1 bed rail: RASS riddle --- */
 function t1(){
@@ -141,7 +143,7 @@ function t3a(x){
 }
 function t3awake(){
   return `<h2 style="margin-top:20px">Twenty minutes later</h2>
-    <div class="npc"><span class="who">Mr. Keller</span>"Mm…" <span class="muted">(eyes open, drifting, looking at you)</span></div>
+    <div class="npc"><span class="who">Mr. Keller</span><span class="muted">(eyes open, brow furrows, head turns toward your voice — the tube keeps him silent)</span></div>
     <p>His eyes are open and tracking. Has he passed the awake test?</p>
     <button class="btn ghost" onclick="t3b(0)">Yes — eyes open is awake</button>
     <button class="btn ghost" onclick="t3b(1)">Not yet — he has to follow a command</button>
@@ -177,11 +179,13 @@ function t4a(x){
 /* --- T5 phone: SBT safety screen; facilitator voices RCP (code 830) --- */
 function t5(){ return header('Clue — The Phone')+`<div class="body">
   <h1>Call Respiratory</h1>
-  <p>The SAT was yours. The vent is not. Pick up the unit phone, call Respiratory, report everything, and screen the SBT side together.</p>
-  <div class="npc"><span class="who">RCP (on the phone)</span>"Report your SAT result and his FiO2 and PEEP right now — not overnight. …Forty and a five, that clears me. He's a CO2 retainer and day five, so I'm going pressure support EIGHT, not five. Thirty minutes minimum."</div>
-  <h2>SBT safety screen — all clear?</h2>
-  <div class="chartrow"><b>FiO2 40%</b> ≤ 50 ✓ · <b>PEEP 5</b> &lt; 8 ✓ · SpO2 91 (target 88–92) ✓</div>
-  <div class="chartrow">RASS 0 ✓ · SAT passed ✓ · no MI in 24h ✓ · not chronically vent-dependent ✓</div>
+  <p>The SAT was yours. The vent is not. Pick up the unit phone and call Respiratory — it's a back-and-forth. Work the call in order:</p>
+  <div class="q"><p><b>① Dial RT.</b> They'll ask you for a report.</p>${audBtn('audio/kel_03a_rt_demand.mp3','RT answers')}</div>
+  <div class="q"><p><b>② Give your report:</b> "He passed the SAT · fentanyl's running for pain · FiO2 40% · PEEP 5 — right now."</p>
+    <p class="muted">Then screen the SBT side together:</p>
+    <div class="chartrow"><b>FiO2 40%</b> ≤ 50 ✓ · <b>PEEP 5</b> &lt; 8 ✓ · SpO2 91 (target 88–92) ✓</div>
+    <div class="chartrow">RASS 0 ✓ · SAT passed ✓ · no MI in 24h ✓ · not chronically vent-dependent ✓</div>
+    ${audBtn('audio/kel_03b_rt_clearance.mp3','RT gives clearance')}</div>
   <h2>Build your clearance code</h2>
   <p>He gave you two numbers. Run them together — the <b>support level</b> first, then the <b>minutes</b>.</p>
   <div class="code">
@@ -196,10 +200,11 @@ function t5(){ return header('Clue — The Phone')+`<div class="body">
 /* --- T6 vent: RSBI + cuff leak (clean) --- */
 function t6(branch){
   const cuff = branch
-    ? '<div class="npc"><span class="who">RCP</span>"Rate twenty-four… no, twenty-six. Tidal volume four hundred. You do the rapid-shallow math — I\'ll check the cuff. …That\'s a problem. Minimal leak, about sixty mils. Cuff leak is NEGATIVE, and he\'s day five. I\'m flagging the airway."</div>'
-    : '<div class="npc"><span class="who">RCP</span>"Rate\'s twenty-six, tidal volume four hundred. You do the rapid-shallow math — I\'ll check the cuff. …Good leak, one-eighty-five mils. Cuff leak POSITIVE."</div>';
+    ? '<div class="npc"><span class="who">RCP (on the phone)</span>"Rate twenty-six, tidal volume four hundred. You do the rapid-shallow math — I\'ll check the cuff. …That\'s a problem. Minimal leak, about sixty mils. Cuff leak is NEGATIVE, and he\'s day five. I\'m flagging the airway."'+audBtn('audio/kel_04b_cuff_negative.mp3','Listen')+'</div>'
+    : '<div class="npc"><span class="who">RCP (on the phone)</span>"Rate\'s twenty-six, tidal volume four hundred. You do the rapid-shallow math — I\'ll check the cuff. …Good leak, one-eighty-five mils. Cuff leak POSITIVE."'+audBtn('audio/kel_04a_cuff_positive.mp3','Listen')+'</div>';
   return header('Clue — The Ventilator')+`<div class="body">
     <h1>Weaning parameters</h1>
+    <div class="q" style="margin-bottom:12px"><p style="margin:0 0 6px">RT left a note this morning:</p>${audBtn('audio/kel_02_rt_bedside.mp3','RT morning note')}</div>
     <p>Thirty-five minutes on pressure support 8. Here's the read:</p>
     <div class="vit">
       <div><div class="l">RR</div><div class="v">26</div><div class="s">spontaneous</div></div>
@@ -253,7 +258,7 @@ function t7b(){ return header('Clue — The Door')+`<div class="body">
   <div id="t7out"></div></div>`+foot(); }
 function t7ba(x){
   const o=document.getElementById('t7out');
-  if(x===1){ o.innerHTML='<div class="npc"><span class="who">Dr. Okafor (phone)</span>"No leak at day five? Do not pull that tube — you\'ll be re-intubating him through an edematous airway. Hold it, start dexamethasone, re-test the leak in the morning. Good catch calling me."</div><div class="fb"><span class="ok">✓ You held the tube for the right reason.</span></div>'+codeBlock('0 7 3 0','The time of the provider\'s hold order.'); }
+  if(x===1){ o.innerHTML='<div class="npc"><span class="who">Dr. Okafor (phone)</span>"No leak at day five? Do not pull that tube — you\'ll be re-intubating him through an edematous airway. Hold it, start dexamethasone, re-test the leak in the morning. Good catch calling me."'+audBtn('audio/kel_05b_md_hold.mp3','Listen')+'</div><div class="fb"><span class="ok">✓ You held the tube for the right reason.</span></div>'+codeBlock('0 7 3 0','The time of the provider\'s hold order.'); playClip("audio/kel_05b_md_hold.mp3"); }
   else o.innerHTML='<div class="dead"><h2>Post-extubation stridor</h2>Within minutes he\'s stridorous and working hard — now you\'re re-intubating an edematous airway. A negative cuff leak at day 5 is a hold, not a go. Go back.</div>';
 }
 

@@ -43,6 +43,7 @@
     background:var(--cardinal);color:#fff;margin:8px 0;display:inline-block}
   .btn:active{transform:scale(.98)} .btn:hover{background:var(--cardinal-br)}
   .btn.ghost{background:var(--slate2);border:1px solid var(--line);color:#eef3f9;width:100%;text-align:left}
+  .btn.gold{background:var(--gold);color:#3a2a00}
   .btn.block{display:block;width:100%;text-align:center}
   .lockin{display:flex;gap:10px;margin:8px 0;flex-wrap:wrap}
   input[type=text]{flex:1;min-width:160px;background:#0e1620;border:1px solid var(--line);color:#fff;font-size:22px;
@@ -94,7 +95,7 @@ const CFG = {
   subtitle:"An ICU escape room · Mr. Keller, Day 5 · 45 minutes",
   tagline:"One patient. One question: is today the day the tube comes out?",
   minutes:45,
-  handoffAudio:"audio/kel_01_handoff.mp3",   // drop the mp3 here in the repo (optional)
+  handoffAudio:"audio/kel_01_handoff_full.mp3",   // in the repo /audio folder
   handoffText:"“Day five. COPD and pneumonia, hypercapnic when he came in — he’s a CO2 retainer, so his gas looks acidotic but that’s his baseline, don’t chase it. Off pressors, afebrile two days. Propofol and fentanyl, RASS goal minus one. That shaking on admission was rigors, not a seizure — neuro cleared it. Day team wants to know if the tube comes out today.”",
   story:"Raymond Keller, 58. COPD + community-acquired pneumonia, intubated 5 days ago for hypercapnic failure. CKD. Full code. Improving — off pressors, afebrile 48 h.",
   finds:[
@@ -185,6 +186,7 @@ function draw(){
     <button class="btn block" onclick="go(3)">Go see him →</button>
     <audio id="ho" src="${CFG.handoffAudio}" preload="none"></audio></div>`; return; }
   if(idx===3){ app.innerHTML=`<div class="card"><p class="kick">Beyond the report</p><h2>At the bedside</h2>
+    <div class="npc"><span class="who">Family — his son, at the bedside</span>“The night nurse said my dad wasn’t ready yet… are you sure you should be waking him up?” <button class="btn gold" style="width:auto;padding:9px 16px;font-size:14px;margin-top:8px" onclick="playClip('audio/kel_06_family.mp3')">▶ Listen</button></div>
     <p class="muted">Tap each to read his chart. These are reference — no codes here.</p>
     <div class="findgrid" id="fg"></div><div id="fc"></div>
     <button class="btn block" id="fnext" style="display:none" onclick="go(4)">Start with Lock 1 →</button></div>`;
@@ -237,7 +239,9 @@ function draw(){
 }
 
 /* actions */
-function playHandoff(){ const a=document.getElementById('ho'); if(a){ a.play().catch(()=>{}); } }
+let _au;
+function playClip(src){ if(!_au)_au=new Audio(); _au.src=src; _au.play().catch(()=>{}); }
+function playHandoff(){ playClip(CFG.handoffAudio); }
 function openFind(i){ document.getElementById('find'+i).classList.add('seen');
   document.getElementById('fc').innerHTML=`<div class="findcard"><span class="src">${CFG.finds[i][1]} · Chart</span><br>${CFG.finds[i][2]}</div>`;
   if([0,1,2,3].every(x=>document.getElementById('find'+x).classList.contains('seen')))
@@ -250,8 +254,13 @@ function tryCode(){ const li=idx-4, lk=allLocks()[li], fb=document.getElementByI
     setTimeout(()=>go(idx+1 <=10 ? idx+1 : 11), 1400); }
   else { fb.className='fb bad'; fb.textContent='✗ '+lk.bad; } }
 function pina(choice){ const correct = branch==='nc' ? 'RETRY' : 'EXTUBATE'; const o=document.getElementById('pfb');
-  if(choice===correct){ o.innerHTML=`<div class="panel" style="border-color:var(--green);border-left-color:var(--green)">🎉 ${branch==='nc'?'Held — and right.':'Pop!'} ${branch==='nc'?'You refused to pull an unsafe tube.':'You didn’t find the answer — you refused to fail him.'}</div>`;
-    setTimeout(()=>go(12),1600); }
+  if(choice===correct){
+    const aud = branch==='nc'
+      ? `<button class="btn gold" style="width:auto;padding:10px 16px;margin-top:10px" onclick="playClip('audio/kel_05b_md_hold.mp3')">▶ Dr. Okafor</button>`
+      : `<button class="btn gold" style="width:auto;padding:10px 16px;margin:10px 8px 0 0" onclick="playClip('audio/kel_05a_md_pull.mp3')">▶ Dr. Okafor</button><button class="btn gold" style="width:auto;padding:10px 16px;margin-top:10px" onclick="playClip('audio/kel_07b_finale.mp3')">▶ Mr. Keller (extubated)</button>`;
+    o.innerHTML=`<div class="panel" style="border-color:var(--green);border-left-color:var(--green)">🎉 ${branch==='nc'?'Held — and right.':'Pop!'} ${branch==='nc'?'You refused to pull an unsafe tube.':'You didn’t find the answer — you refused to fail him.'}<div>${aud}</div>
+      <div style="margin-top:14px"><button class="btn" style="width:auto;padding:11px 18px" onclick="go(12)">Continue to debrief →</button></div></div>`;
+    playClip(branch==='nc'?'audio/kel_05b_md_hold.mp3':'audio/kel_05a_md_pull.mp3'); }
   else if(choice==='SEDATE') o.innerHTML=`<div class="findcard" style="border-left-color:var(--amber)">RASS 0, following commands — sedating a calm, ready patient isn’t caution, it’s another vent day he doesn’t need. Look again.</div>`;
   else if(choice==='EXTUBATE' && branch==='nc') o.innerHTML=`<div class="findcard" style="border-left-color:var(--amber)">No leak at day 5 — you just risked re-intubating him through a swollen airway. Look again.</div>`;
   else o.innerHTML=`<div class="findcard" style="border-left-color:var(--amber)">He passed the screen, the SAT, the SBT, the weaning parameters. What would you keep the tube in for? Look again.</div>`; }
